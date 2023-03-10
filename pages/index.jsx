@@ -14,8 +14,8 @@ const ToggleButton = (props) => {
   const styleClasses = `
     rounded-md
     ${props.selected ? `text-sky-900` : `text-sky-400`}
-    hover:bg-sky-200 hover:shadow-sm
-    active:bg-sky-300
+    hover:bg-sky-100 hover:shadow-sm
+    active:bg-sky-200
     py-1 px-2 
     text-lg font-bold 
     leading-none 
@@ -80,9 +80,8 @@ export function Dropdown() {
           px-2 py-1 
           text-sm text-gray-800 
           ring-1 ring-inset ring-gray-300 
-          hover:ring-sky-600
-        "
-          
+          hover:ring-sky-600 hover:rig-2
+        " 
         >
           {tags.filter(t => t.active)[0].text}
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -106,9 +105,9 @@ export function Dropdown() {
                   <button
                     href={tag.link}
                     className={classNames(
-                      tag.active ? 'bg-sky-100 text-gray-900' : 'text-gray-700',
+                      tag.active ? 'bg-sky-50 text-gray-900' : 'text-gray-700',
                       'px-4 py-2 text-sm',
-                      'hover:bg-sky-200',
+                      'hover:bg-sky-100',
                       'w-full text-left flex justify-between'
                     )}
                   >
@@ -137,6 +136,20 @@ export function Dropdown() {
 
 
 
+/*
+  This example requires some changes to your config:
+  
+  ```
+  // tailwind.config.js
+  module.exports = {
+    // ...
+    plugins: [
+      // ...
+      require('@tailwindcss/forms'),
+    ],
+  }
+  ```
+*/
 
 
 const Task = (props) => {
@@ -162,8 +175,9 @@ const Task = (props) => {
   );
 
   const toggleEditing = () => {
-    console.log("toggle editing from & to ", editing, !editing);
-    setEditing(!editing);
+    if (!editing) {
+      setEditing(!editing);
+    }
   }
 
   const trash = (
@@ -187,8 +201,8 @@ const Task = (props) => {
 
 
   const taskClasses = `
-    px-3 py-1.5 my-2 hover:bg-sky-100
-    ${editing && "shadow-md bg-sky-100"}
+    px-3 py-1.5 my-2 hover:bg-sky-50
+    ${editing && "shadow-md bg-sky-50"}
   `;
 
   const centerAreaClasses = `
@@ -208,9 +222,20 @@ const Task = (props) => {
 
   const editableCenterArea = (
     <>
-      <label htmlFor="comments" className="font-medium text-gray-900">
-        {props.text}
-      </label>
+      <div>
+        <label htmlFor="text" className="sr-only">
+          Tag Text
+        </label>
+        <input
+          type="text"
+          name="text"
+          id="text"
+          className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600"
+          placeholder="tag text"
+          value={props.text}
+        />
+      </div>
+      
       <div>
         <span className='text-gray-70 text-sm mr-1'>TAG:</span>
         <Dropdown/>
@@ -218,6 +243,8 @@ const Task = (props) => {
     </>
   );
 
+
+  
   
 
   return (
@@ -231,7 +258,7 @@ const Task = (props) => {
           className='
             ml-1 py-1 px-2
             leading-6 w-full 
-            hover:bg-sky-200 active:bg-sky-300 
+            hover:bg-sky-100 active:bg-sky-200 
             rounded-md 
             cursor-pointer
             flex flex-col items-start'
