@@ -13,11 +13,11 @@ const ToggleButton = (props) => {
 
   const styleClasses = `
     rounded-md
-    ${props.selected ? `text-sky-900` : `text-sky-400`}
+    ${props.selected ? `text-sky-700` : `text-neutral-300`}
     hover:bg-sky-100 hover:shadow-sm
-    active:bg-sky-200
+    active:bg-sky-200 active:text-sky-700
     py-1 px-2 
-    text-lg font-bold 
+    text-2xl font-black 
     leading-none 
     
     ${props.className}
@@ -268,12 +268,12 @@ const Task = (props) => {
         </div>
         <div className="flex">
           <ToggleButton 
-            className='w-7' 
+            className='w-8' 
             buttonText="U" 
             onClick={props.onToggleUrgent} 
             selected={props.urgent}/>
           <ToggleButton 
-            className='w-7'
+            className='w-8'
             buttonText="I" 
             onClick={props.onToggleImportant}
             selected={props.important} 
