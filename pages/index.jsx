@@ -1,21 +1,21 @@
-
+import {
+  TrashIcon,
+} from '@heroicons/react/20/solid'
+import { useState } from 'react';
 
 
 const ToggleButton = (props) => {
-  console.log(props.selected);
-
-  const selectedClasses = props.selected && `
-    bg-indigo-300
-  `;
 
   const styleClasses = `
-    rounded 
-    bg-indigo-50 hover:bg-indigo-200 active:hover:bg-indigo-100
+    rounded-md
+    ${props.selected ? `text-sky-900` : `text-sky-400`}
+    hover:bg-sky-200 hover:shadow-sm
+    active:bg-sky-300
     py-1 px-2 
-    text-sm font-semibold text-indigo-700 
-    shadow-sm 
+    text-lg font-bold 
+    leading-none 
+    
     ${props.className}
-    ${selectedClasses}
   `;
 
 
@@ -35,25 +35,77 @@ const ToggleButton = (props) => {
 
 
 
-
 const Task = (props) => {
+
+  const [editing, setEditing] = useState(props.editing);
+
   const checkbox = (
-    <div className="flex h-6 items-center">
+    <div className="flex flec-col justify-center">
       <input
         id="comments"
         aria-describedby="comments-description"
         name="comments"
         type="checkbox"
-        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+        className="
+          h-4 w-4 
+          rounded border-2
+          border-gray-300 hover:border-sky-600
+          cursor-pointer
+          text-sky-600 focus:ring-sky-600
+        "
       />
     </div>
   );
 
+  const toggleEditing = () => {
+    console.log("toggle editing from & to ", editing, !editing);
+    setEditing(!editing);
+  }
+
+  const trash = (
+    <div className="flex items-center">
+      <button
+        type="button"
+        className="
+          -m-2.5 
+          flex 
+          h-10 w-10 
+          items-center justify-center 
+          rounded-full 
+          text-gray-400 hover:text-gray-500
+        "
+      >
+        <TrashIcon className="h-5 w-5" aria-hidden="true" />
+        <span className="sr-only">Attach a file</span>
+      </button>
+    </div>
+  )
+
+
+  const taskClasses = `
+    px-3 py-1.5 my-2 hover:bg-sky-100
+    ${editing && "shadow bg-sky-100"}
+  `;
+
+  const centerAreaClasses = `
+    ml-1 py-1 px-2
+    leading-6 w-full 
+    hover:bg-sky-200 active:bg-sky-300 
+    rounded-md 
+    cursor-pointer
+  `;
+
   return (
-    <div className="mt-3">
+    <div className={taskClasses}>
       <div className="relative flex items-start">
-        {checkbox}
-        <div className="ml-3 leading-6">
+        <div>
+          {checkbox}
+          {editing && trash}
+        </div>
+        <div 
+          className={centerAreaClasses}
+          onClick={toggleEditing}  
+        >
           <label htmlFor="comments" className="font-medium text-gray-900">
             {props.text}
           </label>
@@ -61,7 +113,7 @@ const Task = (props) => {
             {props.tag}
           </p>
         </div>
-        <div>
+        <div className="flex">
           <ToggleButton 
             className='w-7' 
             buttonText="U" 
@@ -139,8 +191,6 @@ export default function Home() {
       prioritizeTasks();
     }
   }
-
-  console.log(tempTasks);
 
   return (
     <div>
