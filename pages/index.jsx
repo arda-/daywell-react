@@ -156,48 +156,11 @@ const Task = (props) => {
 
   const [editing, setEditing] = useState(props.editing);
 
-  const checkbox = (
-    <div className="flex flec-col justify-center">
-      <input
-        id="comments"
-        aria-describedby="comments-description"
-        name="comments"
-        type="checkbox"
-        className="
-          h-4 w-4 
-          rounded border-2
-          border-gray-300 hover:border-sky-600
-          cursor-pointer
-          text-sky-600 focus:ring-sky-600
-        "
-      />
-    </div>
-  );
-
   const toggleEditing = () => {
     if (!editing) {
       setEditing(!editing);
     }
   }
-
-  const trash = (
-    <div className="flex items-center">
-      <button
-        type="button"
-        className="
-          -m-2.5 
-          flex 
-          h-10 w-10 
-          items-center justify-center 
-          rounded-full 
-          text-gray-400 hover:text-gray-500
-        "
-      >
-        <TrashIcon className="h-5 w-5" aria-hidden="true" />
-        <span className="sr-only">Attach a file</span>
-      </button>
-    </div>
-  )
 
 
   const taskClasses = `
@@ -237,7 +200,7 @@ const Task = (props) => {
       </div>
       
       <div>
-        <span className='text-gray-70 text-sm mr-1'>TAG:</span>
+        <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <Dropdown/>
       </div>
     </>
@@ -249,10 +212,40 @@ const Task = (props) => {
 
   return (
     <div className={taskClasses}>
-      <div className="relative flex items-start">
-        <div>
-          {checkbox}
-          {editing && trash}
+      <div className="relative flex">
+        <div className='flex flex-col justify-center w-6'>
+          <div className="flex flec-col justify-center">
+            <input
+              id="comments"
+              aria-describedby="comments-description"
+              name="comments"
+              type="checkbox"
+              className="
+                h-4 w-4 
+                rounded border-2
+                border-gray-300 hover:border-sky-600
+                cursor-pointer
+                text-sky-600 focus:ring-sky-600
+              "
+            />
+          </div>
+          {editing && 
+            <button
+              type="button"
+              className="
+                -mg-
+                flex 
+                w-6 h-6
+                mt-2
+                items-center justify-center 
+                rounded-full 
+                text-gray-400 hover:text-gray-500
+              "
+              >
+              <TrashIcon className="h-5 w-5" aria-hidden="true" />
+              <span className="sr-only">Attach a file</span>
+            </button>
+          }
         </div>
         <div 
           className='
@@ -266,14 +259,14 @@ const Task = (props) => {
         >
           {editing ? editableCenterArea : uneditableCenterArea}
         </div>
-        <div className="flex">
+        <div className="flex items-center h-100">
           <ToggleButton 
-            className='w-8' 
+            className='w-8 h-8' 
             buttonText="U" 
             onClick={props.onToggleUrgent} 
             selected={props.urgent}/>
           <ToggleButton 
-            className='w-8'
+            className='w-8 h-8'
             buttonText="I" 
             onClick={props.onToggleImportant}
             selected={props.important} 
