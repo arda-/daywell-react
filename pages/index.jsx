@@ -337,9 +337,9 @@ export default function Home() {
     // console.log(taskMap);
   }
 
-  useEffect(() => {
+  // useEffect(() => {
     // console.log("Updated taskMap:", taskMap);
-  }, [taskMap]);
+  // }, [taskMap]);
 
 
   let groupByTag = true;
