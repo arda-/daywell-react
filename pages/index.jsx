@@ -14,10 +14,12 @@ import { syncedStore, getYjsDoc } from "@syncedstore/core";
 // import { IndexeddbPersistence } from "y-indexeddb";
 
 
+const DEFAULT_DISPLAY_ORDER = [2,0,1,3,4,5,6,7,8,9];
+
 
 // Create your SyncedStore store
-export const store = syncedStore({ 
-  displayOrder: [],
+export const store = syncedStore({
+  displayParams: {},
   taskCollection: {},
 });
 
@@ -72,25 +74,30 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Dropdown() {
+export function Dropdown(props) {
 
   const tags = [
     {
-      active: false,
       link: "#",
-      text: "none"
+      value: "",
+      text: ""
     },
     {
-      active: true,
       link: "#",
       text: "English"
     },
     {
-      active: false,
       link: "#",
       text: "Math"
     }
   ]
+
+  function handleClickItem(tagText) {
+    // console.log("handleClickItem", tagText);
+    if (tagText != props.activeTag) {
+      props.onChange(tagText)
+    }
+  }
 
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -104,7 +111,7 @@ export function Dropdown() {
           hover:ring-amber-600 hover:rig-2
         " 
         >
-          {tags.filter(t => t.active)[0].text}
+          {tags.filter(t => t.text == props.activeTag).text || "None"}
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
         </Menu.Button>
       </div>
@@ -126,20 +133,21 @@ export function Dropdown() {
                   <button
                     href={tag.link}
                     className={classNames(
-                      tag.active ? 'bg-amber-50 text-gray-900' : 'text-gray-700',
+                      tag.text == props.activeTag ? 'bg-amber-50 text-gray-900' : 'text-gray-700',
                       'px-4 py-2 text-sm',
                       'hover:bg-amber-100',
                       'w-full text-left flex justify-between'
                     )}
+                    onClick={() => handleClickItem(tag.text)}
                   >
                     <span>
-                      {tag.text}
+                      {tag.text || "None"}
                     </span>
-                    {tag.active && (
+                    {tag.text == props.activeTag && (
                       <span
                         className={classNames(
                           'inset-y top-0 right-0 flex items-center',
-                          tag.active ? 'text-amber-900' : 'text-indigo-600'
+                          tag.text == props.activeTag ? 'text-amber-900' : 'text-indigo-600'
                         )}
                       >
                         <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -226,12 +234,18 @@ const Task = (props) => {
       
       <div>
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
-        <Dropdown/>
+        <Dropdown
+          activeTag={props.tag}
+          onChange={(selectedTag) => props.setField(props.id, "tag", selectedTag)} 
+        />
       </div>
     </>
   );
 
 
+  function handleTagFilter() {
+
+  }
   
   
 
@@ -306,6 +320,7 @@ const Task = (props) => {
 }
 
 
+
 export default function Home() {
   const state = useSyncedStore(store);
   
@@ -313,7 +328,11 @@ export default function Home() {
   useEffect(() => {
     // const tempTags = Array.from(new Set(tempTasks.map((task) => task.tag)));
     
-    state.displayOrder.push(...[2,0,1,3,4,5,6,7,8,9])
+    state.displayParams.tag =  "";
+    state.displayParams.urgent =  0;
+    state.displayParams.important =  0;
+    state.displayParams.done =  0;
+    state.displayParams.indices =  DEFAULT_DISPLAY_ORDER;
 
     for (let i = 0; i < 10; i++) {
       let tag = null;
@@ -341,6 +360,41 @@ export default function Home() {
     }
   }, [])
 
+
+  function filterTasks() {
+    const indicesToDisplay = [];
+
+    Object.values(state.taskCollection).map((task) => {
+      console.log("consodering inclusion for", task.id);
+      let includeIndex = true;
+      if (state.displayParams.tag != "") {
+        console.log("including Tag in filters", state.displayParams.tag, task.tag, state.displayParams.tag == task.tag);
+        includeIndex = includeIndex && state.displayParams.tag == task.tag;
+      }
+      if (state.displayParams.urgent != 0) {
+        console.log("including urgent in filters");
+        includeIndex = includeIndex && state.displayParams.urgent == task.urgent;
+      }
+      if (state.displayParams.important != 0) {
+        console.log("including important in filters");
+        includeIndex = includeIndex && state.displayParams.important == task.important;
+      }
+      if (state.displayParams.done != 0) {
+        console.log("including done in filters");
+        includeIndex = includeIndex && state.displayParams.done == task.done;
+      }
+
+      if (includeIndex) {
+        console.log("verdict to include", task.id, includeIndex);
+        indicesToDisplay.push(task.id)
+      }
+    });
+
+    console.log("indicesToDisplay", indicesToDisplay)
+    state.displayParams.indices.splice(0, state.displayParams.indices.length);
+    state.displayParams.indices.push(...indicesToDisplay);
+  }
+  
 
 
 
@@ -378,15 +432,27 @@ export default function Home() {
     }
   }
 
+  function handleClickFilterByTag(tag) {
+    console.log("handleClickFilterByTag", tag);
+    state.displayParams.tag = tag
+    filterTasks();
+  }
+
   return (
     <div>
-      <Dropdown />
-      {state.displayOrder.map((i) => 
+      <span>Filter by Tag: </span>
+      <Dropdown 
+        activeTag={state.displayParams.tag}
+        onChange={(tag) => handleClickFilterByTag(tag)}
+        className={classNames('ml-2')}
+      />
+      {state.displayParams.indices?.map((i) => 
       <Task 
         key={i}
         setField={setField}
         {...state.taskCollection["" + i]}
       />)}
+      
     </div>
     
   )
