@@ -6,6 +6,27 @@ import {
 import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
+import { useSyncedStore } from "@syncedstore/react";
+// import { store } from "./lib/store";
+
+import { syncedStore, getYjsDoc } from "@syncedstore/core";
+// import { WebrtcProvider } from "y-webrtc";
+// import { IndexeddbPersistence } from "y-indexeddb";
+
+
+
+// Create your SyncedStore store
+export const store = syncedStore({ 
+  displayOrder: [],
+  taskCollection: {},
+});
+
+// Get the Yjs document and sync automatically using y-webrtc
+const doc = getYjsDoc(store);
+// export const webrtcProvider = new WebrtcProvider("syncedstore-plain", doc);
+// export const provider = new IndexeddbPersistence("my-document-id", doc);
+// export const disconnect = () => webrtcProvider.disconnect();
+// export const connect = () => webrtcProvider.connect();
 
 
 
@@ -231,6 +252,8 @@ const Task = (props) => {
                 cursor-pointer
                 text-amber-600 focus:ring-amber-600
               "
+              checked={props.done}
+              onClick={() => props.setField(props.id, "done", !props.done)} 
             />
           </div>
           {editing && 
@@ -284,14 +307,13 @@ const Task = (props) => {
 
 
 export default function Home() {
-  const [taskMap, setTaskMap] = useState(new Map());
-  const [displayOrder, setDisplayOrder] = useState([1,0,2,3,4,5,6,7,8,9]);
-
+  const state = useSyncedStore(store);
+  
+  
   useEffect(() => {
-    let tempTasks = [];
-
     // const tempTags = Array.from(new Set(tempTasks.map((task) => task.tag)));
-
+    
+    state.displayOrder.push(...[2,0,1,3,4,5,6,7,8,9])
 
     for (let i = 0; i < 10; i++) {
       let tag = null;
@@ -304,8 +326,9 @@ export default function Home() {
           tag = "Math";
           break;
       }
-  
-      tempTasks[i] = {
+
+
+      state.taskCollection["" + i] = {
           important: Boolean(Math.floor((i % 5) % 3)),
           urgent: Boolean(Math.floor(i % 4)),
           tag: tag,
@@ -316,23 +339,18 @@ export default function Home() {
           id: i,
       };
     }
-
-    tempTasks.forEach((task) => taskMap.set(task.id, task));
-
   }, [])
 
 
 
 
   function setField(taskId, field, newValue) {
-    // console.log("setField", taskId, field, newValue);
-    const task = taskMap.get(taskId);
+    console.log("setField", taskId, field, newValue);
+    // const task = state.taskCollection["" + taskId];
     // console.log("task from map before", task);
-    const updatedTask = { ...task, [field]: newValue };
+    // const updatedTask = { ...task, [field]: newValue };
     // console.log("updated task", updatedTask);
-    const newTaskMap = new Map(taskMap);
-    newTaskMap.set(taskId, updatedTask);
-    setTaskMap(newTaskMap)
+    state.taskCollection[taskId][field] = newValue;
     // console.log("task in map now:", newTaskMap.get(taskId));
     // console.log(taskMap);
   }
@@ -363,11 +381,11 @@ export default function Home() {
   return (
     <div>
       <Dropdown />
-      {displayOrder.map((i) => 
+      {state.displayOrder.map((i) => 
       <Task 
         key={i}
         setField={setField}
-        {...taskMap.get(i)}
+        {...state.taskCollection["" + i]}
       />)}
     </div>
     
