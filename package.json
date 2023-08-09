@@ -25,6 +25,7 @@
     "react-dom": "18.2.0",
     "solid": "link:@heroicons/react/20/solid",
     "typescript": "4.9.5",
+    "y-indexeddb": "^9.0.11",
     "y-webrtc": "^10.2.5",
     "yjs": "^13.6.7"
   },
