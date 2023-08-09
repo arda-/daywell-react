@@ -3,7 +3,7 @@ import {
   CheckIcon, 
   ChevronDownIcon,
 } from '@heroicons/react/20/solid'
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 
@@ -155,8 +155,6 @@ export function Dropdown() {
 const Task = (props) => {
 
   const [editing, setEditing] = useState(props.editing);
-  const [urgent, setUrgent] = useState(props.urgent);
-  const [important, setImportant] = useState(props.important);
 
   const toggleEditing = () => {
     if (!editing) {
@@ -167,17 +165,6 @@ const Task = (props) => {
       console.log("done editing", props.text)
     }
   }
-
-  const toggleUrgent = () => {
-    setUrgent(!urgent)
-    console.log(props.text, "- setting urgent to",  urgent)
-  }
-
-  const toggleImportant = () => {
-    setImportant(!important)
-    console.log(props.text, "- setting important to", important)
-  }
-
 
   const taskClasses = `
     px-3 py-1.5 my-2 hover:bg-amber-50
@@ -260,7 +247,7 @@ const Task = (props) => {
               "
               >
               <TrashIcon className="h-5 w-5" aria-hidden="true" />
-              <span className="sr-only">Attach a file</span>
+              <span className="sr-only">Delete</span>
             </button>
           }
         </div>
@@ -280,15 +267,14 @@ const Task = (props) => {
           <ToggleButton 
             className='w-8 h-8' 
             buttonText="U" 
-            onClick={toggleUrgent} 
-            selected={urgent}
+            onClick={() => props.setField(props.id, "urgent", !props.urgent)} 
+            selected={props.urgent}
           /> 
-            {/* note this uses internal state urgent instead of some callback modifying larger overall state  */}
           <ToggleButton 
             className='w-8 h-8'
             buttonText="I" 
-            onClick={toggleImportant}
-            selected={important} 
+            onClick={() => props.setField(props.id, "important", !props.important)}
+            selected={props.important} 
           />
         </div>
       </div>
@@ -298,34 +284,62 @@ const Task = (props) => {
 
 
 export default function Home() {
-  let tempTasks = [];
+  const [taskMap, setTaskMap] = useState(new Map());
+  const [displayOrder, setDisplayOrder] = useState([1,0,2,3,4,5,6,7,8,9]);
 
-  for (let i = 0; i < 10; i++) {
-    let tag = null;
-    let done = Boolean(Math.floor(i % 4 % 3));
-    switch (i % 3) {
-        case 1:
-        tag = "English"
-        break;
-        case 2: 
-        tag = "Math";
-        break;
+  useEffect(() => {
+    let tempTasks = [];
+
+    // const tempTags = Array.from(new Set(tempTasks.map((task) => task.tag)));
+
+
+    for (let i = 0; i < 10; i++) {
+      let tag = null;
+      let done = Boolean(Math.floor(i % 4 % 3));
+      switch (i % 3) {
+          case 1:
+          tag = "English"
+          break;
+          case 2: 
+          tag = "Math";
+          break;
+      }
+  
+      tempTasks[i] = {
+          important: Boolean(Math.floor((i % 5) % 3)),
+          urgent: Boolean(Math.floor(i % 4)),
+          tag: tag,
+          text: "task text " + i,
+          done: done,
+          editing: false,
+          selected: false,
+          id: i,
+      };
     }
 
-    tempTasks[i] = {
-        important: Boolean(Math.floor((i % 5) % 3)),
-        urgent: Boolean(Math.floor(i % 4)),
-        tag: tag,
-        text: "task text " + i,
-        done: done,
-        editing: false,
-        selected: false,
-        id: i,
-    };
+    tempTasks.forEach((task) => taskMap.set(task.id, task));
 
+  }, [])
+
+
+
+
+  function setField(taskId, field, newValue) {
+    // console.log("setField", taskId, field, newValue);
+    const task = taskMap.get(taskId);
+    // console.log("task from map before", task);
+    const updatedTask = { ...task, [field]: newValue };
+    // console.log("updated task", updatedTask);
+    const newTaskMap = new Map(taskMap);
+    newTaskMap.set(taskId, updatedTask);
+    setTaskMap(newTaskMap)
+    // console.log("task in map now:", newTaskMap.get(taskId));
+    // console.log(taskMap);
   }
 
-  const tempTags = Array.from(new Set(tempTasks.map((task) => task.tag)));
+  useEffect(() => {
+    // console.log("Updated taskMap:", taskMap);
+  }, [taskMap]);
 
 
   let groupByTag = true;
@@ -338,19 +352,8 @@ export default function Home() {
     });
   }
 
-  const createTask = () => {
-    tempTasks = tempTasks.concat({
-      important: false,
-      urgent: false,  
-      tag: null,
-      text: "",
-      done: false,
-      editing: true,
-      selected: true,
-    });
-  }
 
-  const handleClickGroupByTag = () => {
+  function handleClickGroupByTag() {
     groupByTag = !groupByTag;
     if (groupByTag) {
       prioritizeTasks();
@@ -360,7 +363,12 @@ export default function Home() {
   return (
     <div>
       <Dropdown />
-      {tempTasks.map((t) => <Task key={t.id} {...t}/>)}
+      {displayOrder.map((i) => 
+      <Task 
+        key={i}
+        setField={setField}
+        {...taskMap.get(i)}
+      />)}
     </div>
     
   )
