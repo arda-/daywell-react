@@ -378,18 +378,26 @@ export default function Home() {
   return (
     <div>
       <h1>Task List</h1>
+      <div class="font-bold italic">all tables:</div>
       {tableStore.getTablesJson()}
-      <br></br>
+      <div class="font-bold italic">tasks:</div>
+      {JSON.stringify(tableStore.getRowIds('task').map((id) => tableStore.getRow('task', id)))}
+      <div class="font-bold italic">values:</div>
       {appStateStore.getValuesJson()}
       <div>
-        {taskCollection.map((task) => (
-          <Task 
-            key={task.id}
-            editing={false}
-            setField={updateTask}
-            {...task}  
-          />
-        ))}
+        {
+          tableStore.getRowIds('task').map((id) => {
+            const task = tableStore.getRow('task', id);
+            return (
+              <Task 
+                key={id}
+                editing={false}
+                setField={updateTask}
+                {...task}  
+              />
+            );
+          })
+        }
       </div>
     </div>
   )
