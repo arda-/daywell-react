@@ -286,57 +286,73 @@ const Task = (props) => {
 
 export default function Home() {
 
-  const [store, setStore] = useState(createStore());
+  let tinyStore = createStore();
 
-  
-  useEffect(() => {
-    console.log("in useEffect");
+  tinyStore.setTablesSchema({
+    task: {
+      id: { type: 'number' }, // should be greater than 0
+      important: { type: 'boolean', default: false, },
+      urgent: { type: 'boolean', default: false, },
+      tag: { type: 'string', default: "" }, // note this could be its own seperate table
+      text: { type: 'string', default: "" },
+      done: { type: 'boolean', default: false },
+    },
+    appState: {
+      activeTask: { type: 'number', default: 0 }, // task id here;
+      sort: { type: 'string', default: "" }, // default means no sorting
+      order: { type: 'string', default: "" }, // default means no order
+    },
+  });
 
-    // console.log("store before setting schema", store);
+  const initialTasks = [
+    {
+      id: 1,
+      important: false,
+      urgent: true,
+      tag: "English",
+      text: "chapter 10 reading",
+      done: false,
+    },
+    {
+      id: 2,
+      important: false,
+      urgent: false,
+      tag: "Math",
+      text: "study for quiz",
+      done: false,
+    }
+  ]
 
-    // task: {
-    //   id: { type: 'number' }, // should be greater than 0
-    //   important: { type: 'boolean', default: false, },
-    //   urgent: { type: 'boolean', default: false, },
-    //   tag: { type: 'string', default: "" }, // note this could be its own seperate table
-    //   text: { type: 'string', default: "" },
-    //   done: { type: 'boolean', default: false },
-    // },
+  const [taskCollection, setTaskCollection] = useState(initialTasks);
 
-    let tempStore = store;
-
-    // let tempStore = store.setTablesSchema({
-    //   appState: {
-    //     activeTask: { type: 'number', default: 0 }, // task id here;
-    //     sort: { type: 'string', default: "" }, // default means no sorting
-    //     order: { type: 'string', default: "" }, // default means no order
-    //   },
-    // });
-
-
-    // setStore(tempStore);
-    // console.log("store after setting schema", store);
-    // console.log("store schema", store.getSchemaJson());
-
-    tempStore = store.setValue(
-      'appState', {
-        activeTask: 0, // zero means none are active
-        sort: "", // empty means no sorting
-        order: "", // empty means no order
-      }
-    );
-
-    setStore(tempStore);
-    // console.log("store after setting schema", store);
-    console.log("getTablesJson", store.getTables());
-  }, [])
+  function updateTask(taskId, field, newValue) {
+    tinyStore.setValue('task', { id: taskId, [field]: newValue });
+    setTaskCollection((prevTasks) =>
+      prevTasks.map((task) => 
+        task.id === taskId ? { ...task, [field]: newValue } : task
+      )
+    )
+  }
 
 
   return (
     <div>
       <h1>placeholder</h1>
-      {JSON.stringify(store)}
+      <div>
+        <h1>Task List</h1>
+        <ul>
+          {taskCollection.map((task) => (
+            <li key={task.id}>
+              <input
+                type="checkbox"
+                checked={task.done}
+                onChange={(e) => updateTask(task.id, 'done', e.target.checked)}
+              />
+              <span>{task.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
-    
   )
 }
