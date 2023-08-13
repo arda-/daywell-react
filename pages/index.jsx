@@ -337,21 +337,16 @@ export default function Home() {
 
   return (
     <div>
-      <h1>placeholder</h1>
+      <h1>Task List</h1>
       <div>
-        <h1>Task List</h1>
-        <ul>
-          {taskCollection.map((task) => (
-            <li key={task.id}>
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={(e) => updateTask(task.id, 'done', e.target.checked)}
-              />
-              <span>{task.text}</span>
-            </li>
-          ))}
-        </ul>
+        {taskCollection.map((task) => (
+          <Task 
+            key={task.id}
+            editing={false}
+            setField={updateTask}
+            {...task}  
+          />
+        ))}
       </div>
     </div>
   )
