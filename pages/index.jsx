@@ -37,16 +37,6 @@ const ToggleButton = (props) => {
 
 
 
-
-
-const people = [
-  { id: 1, name: 'Leslie Alexander' },
-  { id: 2, name: 'banana Alexander' },
-  { id: 3, name: 'cedric Alexander' },
-  { id: 4, name: 'delta Alexander' },
-]
-
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
@@ -142,21 +132,6 @@ export function Dropdown(props) {
 
 
 
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-
 
 const Task = (props) => {
 
@@ -219,12 +194,6 @@ const Task = (props) => {
     </>
   );
 
-
-  function handleTagFilter() {
-
-  }
-  
-  
 
   return (
     <div className={taskClasses}>
@@ -317,13 +286,14 @@ const Task = (props) => {
 
 export default function Home() {
 
-    
-  let store = createStore();
+  const [store, setStore] = useState(createStore());
 
-  const [taskCollection, setTaskCollection] = useState({});
-  const [task, setTask] = useState({});
+  
+  useEffect(() => {
+    console.log("in useEffect");
 
-  store = store.setTablesSchema({
+    // console.log("store before setting schema", store);
+
     // task: {
     //   id: { type: 'number' }, // should be greater than 0
     //   important: { type: 'boolean', default: false, },
@@ -332,64 +302,40 @@ export default function Home() {
     //   text: { type: 'string', default: "" },
     //   done: { type: 'boolean', default: false },
     // },
-    appState: {
-      activeTask: { type: 'number', default: 0 }, // task id here;
-      sort: { type: 'string', default: "" }, // default means no sorting
-      order: { type: 'string', default: "" }, // default means no order
-    },
-  })
 
-  store.setValue(
-    'appState', {
-      activeTask: 0, // zero means none are active
-      sort: "", // empty means no sorting
-      order: "", // empty means no order
-    }
-  );
-  
-  useEffect(() => {
-    console.log("neow");
-    // console.log("taskCollection", taskCollection);
-    store.setValue(
+    let tempStore = store;
+
+    // let tempStore = store.setTablesSchema({
+    //   appState: {
+    //     activeTask: { type: 'number', default: 0 }, // task id here;
+    //     sort: { type: 'string', default: "" }, // default means no sorting
+    //     order: { type: 'string', default: "" }, // default means no order
+    //   },
+    // });
+
+
+    // setStore(tempStore);
+    // console.log("store after setting schema", store);
+    // console.log("store schema", store.getSchemaJson());
+
+    tempStore = store.setValue(
       'appState', {
         activeTask: 0, // zero means none are active
         sort: "", // empty means no sorting
         order: "", // empty means no order
       }
     );
-    console.log("tinyStore content", store.getValues());
-    // console.log("tinyStoreValues", tinyStore.getValues());
+
+    setStore(tempStore);
+    // console.log("store after setting schema", store);
+    console.log("getTablesJson", store.getTables());
   }, [])
 
-
-  // function setField(taskId, field, newValue) {
-  //   console.log("setField", taskId, field, newValue);
-  //   // const task = taskCollection["" + taskId];
-  //   // console.log("task from map before", task);
-  //   // const updatedTask = { ...task, [field]: newValue };
-  //   // console.log("updated task", updatedTask);
-  //   taskCollection[taskId][field] = newValue;
-  //   // console.log("task in map now:", newTaskMap.get(taskId));
-  //   // console.log(taskMap);
-  // }
-
-
-  let groupByTag = true;
-
-  function prioritiazeTasks() {
-    tempTasks = tempTasks.sort((a, b) => {
-      const aStatus = 0 + (a.urgent ? 10 : 0) + (a.important ? 1 : 0);
-      const bStatus = 0 + (b.urgent ? 10 : 0) + (b.important ? 1 : 0);
-      return bStatus - aStatus;
-    });
-  }
 
   return (
     <div>
       <h1>placeholder</h1>
-      {JSON.stringify(task)}
-      <br></br>
-      {JSON.stringify(taskCollection)}
+      {JSON.stringify(store)}
     </div>
     
   )
