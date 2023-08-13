@@ -6,30 +6,7 @@ import {
 import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
-import { useSyncedStore } from "@syncedstore/react";
-// import { store } from "./lib/store";
-
-import { syncedStore, getYjsDoc } from "@syncedstore/core";
-// import { WebrtcProvider } from "y-webrtc";
-// import { IndexeddbPersistence } from "y-indexeddb";
-
-
-const DEFAULT_DISPLAY_ORDER = [2,0,1,3,4,5,6,7,8,9];
-
-
-// Create your SyncedStore store
-export const store = syncedStore({
-  displayParams: {},
-  taskCollection: {},
-});
-
-// Get the Yjs document and sync automatically using y-webrtc
-const doc = getYjsDoc(store);
-// export const webrtcProvider = new WebrtcProvider("syncedstore-plain", doc);
-// export const provider = new IndexeddbPersistence("my-document-id", doc);
-// export const disconnect = () => webrtcProvider.disconnect();
-// export const connect = () => webrtcProvider.connect();
-
+import { createStore } from 'tinybase';
 
 
 const ToggleButton = (props) => {
@@ -321,102 +298,85 @@ const Task = (props) => {
 
 
 
+
+
+// tinyStore.setValues({
+//   'task': {
+//     important: Boolean(Math.floor((i % 5) % 3)),
+//     urgent: Boolean(Math.floor(i % 4)),
+//     tag: tag,
+//     text: "task text " + i,
+//     done: done,
+//     id: i,
+//   },
+// });
+
+
+
+
+
 export default function Home() {
-  const state = useSyncedStore(store);
-  
+
+    
+  let store = createStore();
+
+  const [taskCollection, setTaskCollection] = useState({});
+  const [task, setTask] = useState({});
+
+  store = store.setTablesSchema({
+    // task: {
+    //   id: { type: 'number' }, // should be greater than 0
+    //   important: { type: 'boolean', default: false, },
+    //   urgent: { type: 'boolean', default: false, },
+    //   tag: { type: 'string', default: "" }, // note this could be its own seperate table
+    //   text: { type: 'string', default: "" },
+    //   done: { type: 'boolean', default: false },
+    // },
+    appState: {
+      activeTask: { type: 'number', default: 0 }, // task id here;
+      sort: { type: 'string', default: "" }, // default means no sorting
+      order: { type: 'string', default: "" }, // default means no order
+    },
+  })
+
+  store.setValue(
+    'appState', {
+      activeTask: 0, // zero means none are active
+      sort: "", // empty means no sorting
+      order: "", // empty means no order
+    }
+  );
   
   useEffect(() => {
-    // const tempTags = Array.from(new Set(tempTasks.map((task) => task.tag)));
-    
-    state.displayParams.tag =  "";
-    state.displayParams.urgent =  0;
-    state.displayParams.important =  0;
-    state.displayParams.done =  0;
-    state.displayParams.indices =  DEFAULT_DISPLAY_ORDER;
-
-    for (let i = 0; i < 10; i++) {
-      let tag = null;
-      let done = Boolean(Math.floor(i % 4 % 3));
-      switch (i % 3) {
-          case 1:
-          tag = "English"
-          break;
-          case 2: 
-          tag = "Math";
-          break;
+    console.log("neow");
+    // console.log("taskCollection", taskCollection);
+    store.setValue(
+      'appState', {
+        activeTask: 0, // zero means none are active
+        sort: "", // empty means no sorting
+        order: "", // empty means no order
       }
-
-
-      state.taskCollection["" + i] = {
-          important: Boolean(Math.floor((i % 5) % 3)),
-          urgent: Boolean(Math.floor(i % 4)),
-          tag: tag,
-          text: "task text " + i,
-          done: done,
-          editing: false,
-          selected: false,
-          id: i,
-      };
-    }
+    );
+    console.log("tinyStore content", store.getValues());
+    // console.log("tinyStoreValues", tinyStore.getValues());
   }, [])
 
 
-  function filterTasks() {
-    const indicesToDisplay = [];
-
-    Object.values(state.taskCollection).map((task) => {
-      console.log("consodering inclusion for", task.id);
-      let includeIndex = true;
-      if (state.displayParams.tag != "") {
-        console.log("including Tag in filters", state.displayParams.tag, task.tag, state.displayParams.tag == task.tag);
-        includeIndex = includeIndex && state.displayParams.tag == task.tag;
-      }
-      if (state.displayParams.urgent != 0) {
-        console.log("including urgent in filters");
-        includeIndex = includeIndex && state.displayParams.urgent == task.urgent;
-      }
-      if (state.displayParams.important != 0) {
-        console.log("including important in filters");
-        includeIndex = includeIndex && state.displayParams.important == task.important;
-      }
-      if (state.displayParams.done != 0) {
-        console.log("including done in filters");
-        includeIndex = includeIndex && state.displayParams.done == task.done;
-      }
-
-      if (includeIndex) {
-        console.log("verdict to include", task.id, includeIndex);
-        indicesToDisplay.push(task.id)
-      }
-    });
-
-    console.log("indicesToDisplay", indicesToDisplay)
-    state.displayParams.indices.splice(0, state.displayParams.indices.length);
-    state.displayParams.indices.push(...indicesToDisplay);
-  }
-  
-
-
-
-  function setField(taskId, field, newValue) {
-    console.log("setField", taskId, field, newValue);
-    // const task = state.taskCollection["" + taskId];
-    // console.log("task from map before", task);
-    // const updatedTask = { ...task, [field]: newValue };
-    // console.log("updated task", updatedTask);
-    state.taskCollection[taskId][field] = newValue;
-    // console.log("task in map now:", newTaskMap.get(taskId));
-    // console.log(taskMap);
-  }
-
-  // useEffect(() => {
-    // console.log("Updated taskMap:", taskMap);
-  // }, [taskMap]);
+  // function setField(taskId, field, newValue) {
+  //   console.log("setField", taskId, field, newValue);
+  //   // const task = taskCollection["" + taskId];
+  //   // console.log("task from map before", task);
+  //   // const updatedTask = { ...task, [field]: newValue };
+  //   // console.log("updated task", updatedTask);
+  //   taskCollection[taskId][field] = newValue;
+  //   // console.log("task in map now:", newTaskMap.get(taskId));
+  //   // console.log(taskMap);
+  // }
 
 
   let groupByTag = true;
 
-  function prioritizeTasks() {
+  function prioritiazeTasks() {
     tempTasks = tempTasks.sort((a, b) => {
       const aStatus = 0 + (a.urgent ? 10 : 0) + (a.important ? 1 : 0);
       const bStatus = 0 + (b.urgent ? 10 : 0) + (b.important ? 1 : 0);
@@ -424,35 +384,12 @@ export default function Home() {
     });
   }
 
-
-  function handleClickGroupByTag() {
-    groupByTag = !groupByTag;
-    if (groupByTag) {
-      prioritizeTasks();
-    }
-  }
-
-  function handleClickFilterByTag(tag) {
-    console.log("handleClickFilterByTag", tag);
-    state.displayParams.tag = tag
-    filterTasks();
-  }
-
   return (
     <div>
-      <span>Filter by Tag: </span>
-      <Dropdown 
-        activeTag={state.displayParams.tag}
-        onChange={(tag) => handleClickFilterByTag(tag)}
-        className={classNames('ml-2')}
-      />
-      {state.displayParams.indices?.map((i) => 
-      <Task 
-        key={i}
-        setField={setField}
-        {...state.taskCollection["" + i]}
-      />)}
-      
+      <h1>placeholder</h1>
+      {JSON.stringify(task)}
+      <br></br>
+      {JSON.stringify(taskCollection)}
     </div>
     
   )

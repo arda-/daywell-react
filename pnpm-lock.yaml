@@ -50,6 +50,9 @@ dependencies:
   solid:
     specifier: link:@heroicons/react/20/solid
     version: link:@heroicons/react/20/solid
+  tinybase:
+    specifier: ^4.0.4
+    version: 4.0.4(react@18.2.0)(yjs@13.6.7)
   typescript:
     specifier: 4.9.5
     version: 4.9.5
@@ -2475,6 +2478,37 @@ packages:
     dependencies:
       globalyzer: 0.1.0
       globrex: 0.1.2
+    dev: false
+
+  /tinybase@4.0.4(react@18.2.0)(yjs@13.6.7):
+    resolution: {integrity: sha512-blKgOrtA9NXBJyD1PvASNk1BbeFO7knr1xxzZUrY7Ha89L1p1mUDFcZJbjKdQRnBF1PNN9k+qmoog34VrRSqCA==}
+    hasBin: true
+    peerDependencies:
+      '@sqlite.org/sqlite-wasm': ^3.42.0-build4
+      '@vlcn.io/crsqlite-wasm': ^0.14.0
+      automerge-repo: ^0.1.0
+      prettier: ^2.8.8
+      react: ^18.2.0
+      sqlite3: ^5.1.6
+      yjs: ^13.6.7
+    peerDependenciesMeta:
+      '@sqlite.org/sqlite-wasm':
+        optional: true
+      '@vlcn.io/crsqlite-wasm':
+        optional: true
+      automerge-repo:
+        optional: true
+      prettier:
+        optional: true
+      react:
+        optional: true
+      sqlite3:
+        optional: true
+      yjs:
+        optional: true
+    dependencies:
+      react: 18.2.0
+      yjs: 13.6.7
     dev: false
 
   /to-regex-range@5.0.1:
