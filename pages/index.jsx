@@ -6,7 +6,8 @@ import {
 import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
-import { createStore } from 'tinybase';
+import { createStore, createQueries } from 'tinybase';
+import { useCreateStore, useValue } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -267,42 +268,73 @@ const Task = (props) => {
 
 
 
-
-
-// tinyStore.setValues({
-//   'task': {
-//     important: Boolean(Math.floor((i % 5) % 3)),
-//     urgent: Boolean(Math.floor(i % 4)),
-//     tag: tag,
-//     text: "task text " + i,
-//     done: done,
-//     id: i,
-//   },
-// });
-
-
-
-
-
 export default function Home() {
 
-  let tinyStore = createStore();
+  // const store = useCreateStore(() => {
+  //   console.log("created store!");
+  //   const store = createStore().setTable('appState', {
+  //     activeTask: 0,
+  //     sort: "",
+  //     order: "",
+  //   });
+  //   console.log("store schema", store.getValues());
+  //   return store;
+  // });
 
-  tinyStore.setTablesSchema({
-    task: {
-      id: { type: 'number' }, // should be greater than 0
-      important: { type: 'boolean', default: false, },
-      urgent: { type: 'boolean', default: false, },
-      tag: { type: 'string', default: "" }, // note this could be its own seperate table
-      text: { type: 'string', default: "" },
-      done: { type: 'boolean', default: false },
-    },
-    appState: {
-      activeTask: { type: 'number', default: 0 }, // task id here;
-      sort: { type: 'string', default: "" }, // default means no sorting
-      order: { type: 'string', default: "" }, // default means no order
-    },
+  // const value = useValue("appState", store);
+  // console.log("app state", JSON.stringify(value));
+
+  const tableStore = useCreateStore(() => {
+    console.log('table store created');
+    return createStore()
+      // .setTablesSchema({
+      //   task: {
+      //     id: { type: 'number' }, // should be greater than 0
+      //     important: { type: 'boolean', default: false, },
+      //     urgent: { type: 'boolean', default: false, },
+      //     tag: { type: 'string', default: "" }, // note this could be its own seperate table
+      //     text: { type: 'string', default: "" },
+      //     done: { type: 'boolean', default: false },
+      //   },
+      // })
+      .setTable('task', {
+        1: { 
+          important: false,
+          urgent: true,
+          tag: "English",
+          text: "chapter 10 reading",
+          done: false,
+        },
+      })
   });
+
+  const appStateStore = useCreateStore(() => {
+    console.log('app state store created');
+    return createStore()
+      .setValues({
+        activeTask: 0, 
+        sort: '', 
+        order: '',
+      })
+  });
+
+
+
+  // tinyStore = tinyStore.setTablesSchema({
+  //   task: {
+  //     id: { type: 'number' }, // should be greater than 0
+  //     important: { type: 'boolean', default: false, },
+  //     urgent: { type: 'boolean', default: false, },
+  //     tag: { type: 'string', default: "" }, // note this could be its own seperate table
+  //     text: { type: 'string', default: "" },
+  //     done: { type: 'boolean', default: false },
+  //   },
+  //   appState: {
+  //     activeTask: { type: 'number', default: 0 }, // task id here;
+  //     sort: { type: 'string', default: "" }, // default means no sorting
+  //     order: { type: 'string', default: "" }, // default means no order
+  //   },
+  // });
 
   const initialTasks = [
     {
@@ -323,10 +355,12 @@ export default function Home() {
     }
   ]
 
+
   const [taskCollection, setTaskCollection] = useState(initialTasks);
 
+
   function updateTask(taskId, field, newValue) {
-    tinyStore.setValue('task', { id: taskId, [field]: newValue });
+    // tinyStore.setValue('task', { id: taskId, [field]: newValue });
     setTaskCollection((prevTasks) =>
       prevTasks.map((task) => 
         task.id === taskId ? { ...task, [field]: newValue } : task
@@ -334,10 +368,19 @@ export default function Home() {
     )
   }
 
+  
+  useEffect(() => {
+    console.log("in UseEffect");
+    console.log("gettting tables", tableStore.getTablesJson());
+    console.log("app state", appStateStore.getValuesJson());
+  }, [])
 
   return (
     <div>
       <h1>Task List</h1>
+      {tableStore.getTablesJson()}
+      <br></br>
+      {appStateStore.getValuesJson()}
       <div>
         {taskCollection.map((task) => (
           <Task 
