@@ -7,7 +7,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useRow, useValue } from 'tinybase/ui-react';
+import { useCreateStore, useRow, useValue, useTable, useTables, useValues } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -136,17 +136,15 @@ export function Dropdown(props) {
 
 const Task = (props) => {
 
-  const [editing, setEditing] = useState(props.editing);
-
-  const task = useRow('task', props.id, props.tableStore)
+  let task = useRow('task', props.id, props.tableStore);
+  let editing = useValue('activeTask', props.appStateStore);
 
   const toggleEditing = () => {
     if (!editing) {
-      setEditing(true);
       console.log("begin editing", task.text)
+      props.appStateStore.setValue('activeTask', props.id);
     } else {
-      setEditing(false);
-      console.log("done editing", task.text)
+      props.appStateStore.setValue('activeTask', 0);
     }
   }
 
@@ -198,11 +196,12 @@ const Task = (props) => {
   );
 
 
+
   return (
     <div className={taskClasses}>
       <div className="relative flex">
         <div className='flex flex-col justify-center w-6'>
-          <div className="flex flec-col justify-center">
+          <div className="flex flex-col justify-center">
             <input
               id="comments"
               aria-describedby="comments-description"
@@ -216,7 +215,7 @@ const Task = (props) => {
                 text-amber-600 focus:ring-amber-600
               "
               defaultChecked={task.done}
-              // onChange={() => props.tableStore.setCell('task', props.id, 'done', !task.done)} 
+              onChange={() => props.tableStore.setCell('task', props.id, 'done', !task.done)} 
             />
           </div>
           {editing && 
@@ -320,8 +319,6 @@ export default function Home() {
       })
   });
 
-
-
   // tinyStore = tinyStore.setTablesSchema({
   //   task: {
   //     id: { type: 'number' }, // should be greater than 0
@@ -367,26 +364,28 @@ export default function Home() {
     console.log("app state", appStateStore.getValuesJson());
   }, [])
 
+  const tables = useTables(tableStore);
+  const tasks = useTable('task', tableStore)
+  const values = useValues(appStateStore);
+
   return (
     <div>
       <h1>Task List</h1>
       <div className="font-bold italic">all tables:</div>
-      {tableStore.getTablesJson()}
+      {JSON.stringify(tables)}
       <div className="font-bold italic">tasks:</div>
-      {JSON.stringify(tableStore.getRowIds('task').map((id) => tableStore.getRow('task', id)))}
+      {JSON.stringify(tasks)}
       <div className="font-bold italic">values:</div>
-      {appStateStore.getValuesJson()}
+      {JSON.stringify(values)}
       <div>
         {
           tableStore.getRowIds('task').map((id) => {
-            const task = tableStore.getRow('task', id);
             return (
               <Task 
                 key={id}
                 id={id}
-                editing={false}
                 tableStore={tableStore}
-                {...task}  
+                appStateStore={appStateStore}
               />
             );
           })
