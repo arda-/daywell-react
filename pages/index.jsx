@@ -7,7 +7,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useAddRowCallback } from 'tinybase/ui-react';
+import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useAddRowCallback, useDelRowCallback } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -137,7 +137,7 @@ export function Dropdown(props) {
 const Task = (props) => {
 
   let task = useRow('task', props.id, props.tableStore);
-  let editing = useValue('activeTask', props.appStateStore);
+  let editing = useValue('activeTask', props.appStateStore) == props.id;
 
   const toggleEditing = () => {
     if (!editing) {
@@ -156,6 +156,24 @@ const Task = (props) => {
   const centerAreaClasses = `
     
   `;
+
+  const handleDeleteTask = (taskId) => {
+    // to be deleted, task was active. remove it from active task status.
+    console.log("deleting", taskId);
+    props.appStateStore.setValue('activeTask', 0);
+    props.tableStore.setCell('task', taskId, 'deleted', true)
+    // TODO: show UNDO toast
+  }
+  
+  
+  useDelRowCallback(
+    'task',
+    props.id,
+    props.tableStore,
+    () => console.log(`deleted task ${props.id}`)
+  )
+
+
 
   const uneditableCenterArea = (
     <div
@@ -189,7 +207,7 @@ const Task = (props) => {
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <Dropdown
           activeTag={task.tag}
-          onChange={(selectedTag) => task.setCell('task', props.id, 'tag', selectedTag)} 
+          onChange={(selectedTag) => props.tableStore.setCell('task', props.id, 'tag', selectedTag)} 
         />
       </div>
     </>
@@ -230,6 +248,7 @@ const Task = (props) => {
                 rounded-full 
                 text-gray-400 hover:text-gray-500
               "
+              onClick={() => handleDeleteTask(props.id)}
               >
               <TrashIcon className="h-5 w-5" aria-hidden="true" />
               <span className="sr-only">Delete</span>
@@ -305,7 +324,16 @@ export default function Home() {
           tag: "English",
           text: "chapter 10 reading",
           done: false,
+          deleted: false,
         },
+        2: {
+          important: false,
+          urgent: false,
+          tag: "Math",
+          text: "study for quiz",
+          done: false,
+          deleted: true,
+        }
       })
   });
 
@@ -368,20 +396,24 @@ export default function Home() {
   const tasks = useTable('task', tableStore)
   const values = useValues(appStateStore);
 
-  const handleCreateNewTask = useAddRowCallback(
-    'task',
-    (e) => ({ 
-      important: false,
-      urgent: false,
-      tag: "",
-      text: "add text here",
-      done: false,
-    }),
-    [], // dependencies,
-    tableStore,
-    (rowId, tableStore, row) => console.log(`added row: ${rowId}`),
-  );
 
+  const handleAddTask = () => {
+    const newRowId = tableStore.addRow(
+      'task', 
+      { 
+        important: false,
+        urgent: false,
+        tag: "",
+        text: "add text here",
+        done: false,
+        deleted: false,
+      },
+      false,  
+    );
+    appStateStore.setValue('activeTask', newRowId);
+  }
+
+  
   return (
     <div>
       <h1>Task List</h1>
@@ -394,6 +426,7 @@ export default function Home() {
       <div>
         {
           tableStore.getRowIds('task').map((id) => {
+            if (!tableStore.getCell('task', id, 'deleted'))
             return (
               <Task 
                 key={id}
@@ -406,10 +439,7 @@ export default function Home() {
         }
       </div>
       <button
-        onClick={(e) => {
-          console.log("add new button");
-          handleCreateNewTask(e);
-        }}
+        onClick={handleAddTask}
       >
         add new task
       </button>
