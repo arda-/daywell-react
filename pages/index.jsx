@@ -7,7 +7,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useRow, useValue, useTable, useTables, useValues } from 'tinybase/ui-react';
+import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useAddRowCallback } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -368,6 +368,20 @@ export default function Home() {
   const tasks = useTable('task', tableStore)
   const values = useValues(appStateStore);
 
+  const handleCreateNewTask = useAddRowCallback(
+    'task',
+    (e) => ({ 
+      important: false,
+      urgent: false,
+      tag: "",
+      text: "add text here",
+      done: false,
+    }),
+    [], // dependencies,
+    tableStore,
+    (rowId, tableStore, row) => console.log(`added row: ${rowId}`),
+  );
+
   return (
     <div>
       <h1>Task List</h1>
@@ -391,6 +405,14 @@ export default function Home() {
           })
         }
       </div>
+      <button
+        onClick={(e) => {
+          console.log("add new button");
+          handleCreateNewTask(e);
+        }}
+      >
+        add new task
+      </button>
     </div>
   )
 }
