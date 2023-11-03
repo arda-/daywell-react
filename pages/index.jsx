@@ -7,7 +7,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useAddRowCallback, useDelRowCallback } from 'tinybase/ui-react';
+import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useResultRowIds, useDelRowCallback, useCreateQueries } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -47,7 +47,6 @@ export function Dropdown(props) {
   const tags = [
     {
       link: "#",
-      value: "",
       text: ""
     },
     {
@@ -164,14 +163,6 @@ const Task = (props) => {
     props.tableStore.setCell('task', taskId, 'deleted', true)
     // TODO: show UNDO toast
   }
-  
-  
-  useDelRowCallback(
-    'task',
-    props.id,
-    props.tableStore,
-    () => console.log(`deleted task ${props.id}`)
-  )
 
 
 
@@ -347,6 +338,18 @@ export default function Home() {
       })
   });
 
+
+  const queries = createQueries(tableStore).setQueryDefinition(
+    'notDeleted', // query name
+    'task', // table name
+    ({select, where}) => {
+      select('deleted');
+      where('deleted', false)
+    }
+  );
+
+  let undeletedTaskIds = useResultRowIds('notDeleted', queries);
+
   // tinyStore = tinyStore.setTablesSchema({
   //   task: {
   //     id: { type: 'number' }, // should be greater than 0
@@ -362,28 +365,6 @@ export default function Home() {
   //     order: { type: 'string', default: "" }, // default means no order
   //   },
   // });
-
-  const initialTasks = [
-    {
-      id: 1,
-      important: false,
-      urgent: true,
-      tag: "English",
-      text: "chapter 10 reading",
-      done: false,
-    },
-    {
-      id: 2,
-      important: false,
-      urgent: false,
-      tag: "Math",
-      text: "study for quiz",
-      done: false,
-    }
-  ]
-
-
-  const [taskCollection, setTaskCollection] = useState(initialTasks);
 
   
   useEffect(() => {
@@ -426,7 +407,9 @@ export default function Home() {
       <div>
         {
           tableStore.getRowIds('task').map((id) => {
-            if (!tableStore.getCell('task', id, 'deleted'))
+            // TODO: CHANGE THIS TO BE A QUERY FROM TINYBASE
+            // https://tinybase.org/api/ui-react/functions/queries-hooks/usecreatequeries/
+            // if (!tableStore.getCell('task', id, 'deleted'))
             return (
               <Task 
                 key={id}
