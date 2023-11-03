@@ -7,7 +7,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useValue } from 'tinybase/ui-react';
+import { useCreateStore, useRow, useValue } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -138,13 +138,15 @@ const Task = (props) => {
 
   const [editing, setEditing] = useState(props.editing);
 
+  const task = useRow('task', props.id, props.tableStore)
+
   const toggleEditing = () => {
     if (!editing) {
       setEditing(true);
-      console.log("begin editing", props.text)
+      console.log("begin editing", task.text)
     } else {
       setEditing(false);
-      console.log("done editing", props.text)
+      console.log("done editing", task.text)
     }
   }
 
@@ -161,10 +163,10 @@ const Task = (props) => {
     <div
     >
       <label htmlFor="comments" className="font-medium text-gray-900">
-        {props.text}
+        {task.text}
       </label>
       <p id="comments-description" className="text-gray-500 text-sm">
-        {props.tag}
+        {task.tag}
       </p>
     </div>
   );
@@ -181,15 +183,15 @@ const Task = (props) => {
           id="text"
           className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-600"
           placeholder="tag text"
-          defaultValue={props.text}
+          defaultValue={task.text}
         />
       </div>
       
       <div>
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <Dropdown
-          activeTag={props.tag}
-          onChange={(selectedTag) => props.setField(props.id, "tag", selectedTag)} 
+          activeTag={task.tag}
+          onChange={(selectedTag) => task.setCell('task', props.id, 'tag', selectedTag)} 
         />
       </div>
     </>
@@ -213,8 +215,8 @@ const Task = (props) => {
                 cursor-pointer
                 text-amber-600 focus:ring-amber-600
               "
-              checked={props.done}
-              onClick={() => props.setField(props.id, "done", !props.done)} 
+              defaultChecked={task.done}
+              // onChange={() => props.tableStore.setCell('task', props.id, 'done', !task.done)} 
             />
           </div>
           {editing && 
@@ -251,14 +253,14 @@ const Task = (props) => {
           <ToggleButton 
             className='w-8 h-8' 
             buttonText="U" 
-            onClick={() => props.setField(props.id, "urgent", !props.urgent)} 
-            selected={props.urgent}
+            onClick={() => props.tableStore.setCell('task', props.id, 'urgent', !task.urgent)} 
+            selected={task.urgent}
           /> 
           <ToggleButton 
             className='w-8 h-8'
             buttonText="I" 
-            onClick={() => props.setField(props.id, "important", !props.important)}
-            selected={props.important} 
+            onClick={() => props.tableStore.setCell('task', props.id, 'important', !task.important)} 
+            selected={task.important} 
           />
         </div>
       </div>
@@ -358,16 +360,6 @@ export default function Home() {
 
   const [taskCollection, setTaskCollection] = useState(initialTasks);
 
-
-  function updateTask(taskId, field, newValue) {
-    // tinyStore.setValue('task', { id: taskId, [field]: newValue });
-    setTaskCollection((prevTasks) =>
-      prevTasks.map((task) => 
-        task.id === taskId ? { ...task, [field]: newValue } : task
-      )
-    )
-  }
-
   
   useEffect(() => {
     console.log("in UseEffect");
@@ -378,11 +370,11 @@ export default function Home() {
   return (
     <div>
       <h1>Task List</h1>
-      <div class="font-bold italic">all tables:</div>
+      <div className="font-bold italic">all tables:</div>
       {tableStore.getTablesJson()}
-      <div class="font-bold italic">tasks:</div>
+      <div className="font-bold italic">tasks:</div>
       {JSON.stringify(tableStore.getRowIds('task').map((id) => tableStore.getRow('task', id)))}
-      <div class="font-bold italic">values:</div>
+      <div className="font-bold italic">values:</div>
       {appStateStore.getValuesJson()}
       <div>
         {
@@ -391,8 +383,9 @@ export default function Home() {
             return (
               <Task 
                 key={id}
+                id={id}
                 editing={false}
-                setField={updateTask}
+                tableStore={tableStore}
                 {...task}  
               />
             );
