@@ -143,7 +143,7 @@ const Task = (props) => {
       console.log("begin editing", task.text)
       props.appStateStore.setValue('activeTask', props.id);
     } else {
-      props.appStateStore.setValue('activeTask', 0);
+      // props.appStateStore.setValue('activeTask', 0);
     }
   }
 
@@ -280,34 +280,9 @@ const Task = (props) => {
 
 
 export default function Home() {
-
-  // const store = useCreateStore(() => {
-  //   console.log("created store!");
-  //   const store = createStore().setTable('appState', {
-  //     activeTask: 0,
-  //     sort: "",
-  //     order: "",
-  //   });
-  //   console.log("store schema", store.getValues());
-  //   return store;
-  // });
-
-  // const value = useValue("appState", store);
-  // console.log("app state", JSON.stringify(value));
-
   const tableStore = useCreateStore(() => {
     console.log('table store created');
     return createStore()
-      // .setTablesSchema({
-      //   task: {
-      //     id: { type: 'number' }, // should be greater than 0
-      //     important: { type: 'boolean', default: false, },
-      //     urgent: { type: 'boolean', default: false, },
-      //     tag: { type: 'string', default: "" }, // note this could be its own seperate table
-      //     text: { type: 'string', default: "" },
-      //     done: { type: 'boolean', default: false },
-      //   },
-      // })
       .setTable('task', {
         1: { 
           important: false,
@@ -339,39 +314,22 @@ export default function Home() {
   });
 
 
-  const queries = createQueries(tableStore).setQueryDefinition(
-    'notDeleted', // query name
-    'task', // table name
-    ({select, where}) => {
-      select('deleted');
-      where('deleted', false)
-    }
-  );
+  const queries = useCreateQueries(tableStore, (tableStore) => {
+    console.log("queries created");
+    return createQueries(tableStore).setQueryDefinition(
+      'notDeleted', // query name
+      'task', // table name
+      ({select, where}) => {
+        select('deleted');
+        where('deleted', false)
+      }
+    );
+  });
 
   let undeletedTaskIds = useResultRowIds('notDeleted', queries);
 
-  // tinyStore = tinyStore.setTablesSchema({
-  //   task: {
-  //     id: { type: 'number' }, // should be greater than 0
-  //     important: { type: 'boolean', default: false, },
-  //     urgent: { type: 'boolean', default: false, },
-  //     tag: { type: 'string', default: "" }, // note this could be its own seperate table
-  //     text: { type: 'string', default: "" },
-  //     done: { type: 'boolean', default: false },
-  //   },
-  //   appState: {
-  //     activeTask: { type: 'number', default: 0 }, // task id here;
-  //     sort: { type: 'string', default: "" }, // default means no sorting
-  //     order: { type: 'string', default: "" }, // default means no order
-  //   },
-  // });
+  console.log("undeleted task iDs", undeletedTaskIds);
 
-  
-  useEffect(() => {
-    console.log("in UseEffect");
-    console.log("gettting tables", tableStore.getTablesJson());
-    console.log("app state", appStateStore.getValuesJson());
-  }, [])
 
   const tables = useTables(tableStore);
   const tasks = useTable('task', tableStore)
@@ -406,7 +364,8 @@ export default function Home() {
       {JSON.stringify(values)}
       <div>
         {
-          tableStore.getRowIds('task').map((id) => {
+          undeletedTaskIds.map((id) => {
+          // tableStore.getRowIds('task').map((id) => {
             // TODO: CHANGE THIS TO BE A QUERY FROM TINYBASE
             // https://tinybase.org/api/ui-react/functions/queries-hooks/usecreatequeries/
             // if (!tableStore.getCell('task', id, 'deleted'))
