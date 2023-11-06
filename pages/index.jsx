@@ -320,8 +320,6 @@ export default function Home() {
     return createStore()
       .setTable('task', {
         0: { 
-          important: false,
-          urgent: false,
           priority: 0,
           tag: "English",
           text: "chapter 10 reading",
@@ -329,8 +327,6 @@ export default function Home() {
           deleted: false,
         },
         1: {
-          important: true,
-          urgent: false,
           priority: 1,
           tag: "Math",
           text: "study for quiz",
@@ -338,8 +334,6 @@ export default function Home() {
           deleted: false,
         },
         2: {
-          important: false,
-          urgent: true,
           priority: 3,
           tag: "Biology",
           text: "Lab writeup",
@@ -347,11 +341,9 @@ export default function Home() {
           deleted: false,
         },
         3: {
-          important: true,
-          urgent: true,
           priority: 2,
-          tag: "Biology",
-          text: "Lab writeup",
+          tag: "Music",
+          text: "Theory worksheet",
           done: false,
           deleted: false,
         }
@@ -394,8 +386,6 @@ export default function Home() {
     const newRowId = tableStore.addRow(
       'task', 
       { 
-        important: false,
-        urgent: false,
         priority: 0,
         tag: "",
         text: "add text here",
