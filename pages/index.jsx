@@ -3,7 +3,15 @@ import {
   CheckIcon, 
   ChevronDownIcon,
 } from '@heroicons/react/20/solid'
-import { useState, useEffect, useMemo, useRef, Fragment } from 'react';
+import { 
+  useState, 
+  useEffect, 
+  useMemo, 
+  useRef, 
+  Fragment,
+  createContext,
+  useContext,
+} from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries, createIndexes } from 'tinybase';
@@ -57,7 +65,6 @@ const ToggleButton = (props) => {
       </button>
   )
 }
-
 
 
 function classNames(...classes) {
@@ -325,6 +332,22 @@ const Task = (props) => {
 }
 
 
+const TaskList = (props) => {
+  const { taskIds, tableStore, appStateStore } = props;
+  return (
+    <>
+      {taskIds.map((id) => (
+        <Task 
+          key={id}
+          id={id}
+          tableStore={tableStore}
+          appStateStore={appStateStore}
+        />
+      ))}
+    </>
+  );
+}
+
 
 export default function App() {
   let tableStore = useRef(null);
@@ -377,8 +400,13 @@ export default function App() {
   }, [])
   
   const calcDisplayOrderString = () => appStateStore.getValue('taskIdOrder')
-  const calcDisplayOrderIds = () => JSON.parse(appStateStore.getValue('taskIdOrder'))
-  const [displayOrder, setDisplayOrder] = useState([])
+  const calcDisplayOrderIds = () => {
+    const value = appStateStore.getValue('taskIdOrder');
+    return value ? JSON.parse(value) : [];
+  }
+
+  const displayOrderString = useValue('taskIdOrder', appStateStore);
+
 
   useEffect(() => {
     console.log("initialization useEffect")
@@ -388,7 +416,6 @@ export default function App() {
     appStateStore.setValue('taskIdOrder', JSON.stringify(defaultDisplayOrder))
 
     console.log("displayOrderString", calcDisplayOrderString());
-    setDisplayOrder(calcDisplayOrderIds());
   }, [])
 
   
@@ -427,7 +454,6 @@ export default function App() {
     if (shouldUpdateDisplayOrder(newOrder)) {
       // update the app state variable with this new order
       appStateStore.setValue('taskIdOrder', JSON.stringify(newOrder))
-      setDisplayOrder(calcDisplayOrderIds());
     }
   }
 
@@ -436,26 +462,25 @@ export default function App() {
     <div>
       <h1>Task List</h1>
 
-      <div className="font-bold italic">displayOrderString:</div>
-      {appStateStore.getValue('taskIdOrder')}
+      {/* { displayOrderString &&  */}
+        <>
+          <div className="font-bold italic">displayOrderString:</div>
+          {displayOrderString}
+        </>
+      {/* } */}
 
       <div className="font-bold italic">values:</div>
       {JSON.stringify(values)}
 
       <div>
-        {
-          // unsortedIds.map((id) => {
-          // sortedIds.map((id) => {
-            displayOrder.map((id) => {
-            return (
-              <Task 
-                key={id}
-                id={id}
-                tableStore={tableStore}
-                appStateStore={appStateStore}
-              />
-            );
-          })
+        task list component should be here:
+        {displayOrderString && 
+
+          <TaskList 
+            taskIds={JSON.parse(displayOrderString)}
+            tableStore={tableStore}
+            appStateStore={appStateStore}
+          />
         }
       </div>
       <button
