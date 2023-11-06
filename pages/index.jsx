@@ -10,6 +10,14 @@ import { createStore, createQueries } from 'tinybase';
 import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useResultRowIds, useDelRowCallback, useCreateQueries, useResultTable, useRowIds } from 'tinybase/ui-react';
 
 
+const priorityIsUrgent = (priority) => {
+  return (priority & 0b010) === 0b010;
+}
+
+const priorityIsImportant = (priority) => {
+  return (priority & 0b01) === 0b01;
+}
+
 const ToggleButton = (props) => {
 
   const styleClasses = `
@@ -156,11 +164,38 @@ const Task = (props) => {
     
   `;
 
-  const handleDeleteTask = (taskId) => {
+
+  const handleToggleImportant = () => {
+    // if it's odd, then it has an important bit already set
+    if (priorityIsImportant(task.priority)) {
+      // clear out the bottom bit by SUBTRACTING ONE
+      props.tableStore.setCell('task', props.id, 'priority', task.priority - 1)
+    } else {
+      // if it's even, then it doesn't have the important bit set
+      // set the bottom bit to 1 by ADDING ONE
+      props.tableStore.setCell('task', props.id, 'priority', task.priority + 1)
+    }
+  }
+
+  const handleToggleUrgent = () => {
+    // if the second bit is on, it's important
+    if (priorityIsUrgent(task.priority)) {
+      console.log("and succeeded");
+      // so clear out that second bit by SUBTRACTING TWO
+      props.tableStore.setCell('task', props.id, 'priority', task.priority - 2)
+    } else {
+      // the second bit isn't on, so ADD TWO to turn that bit on.
+      props.tableStore.setCell('task', props.id, 'priority', task.priority + 2)
+    }
+  }
+
+
+
+  const handleDeleteTask = () => {
     // to be deleted, task was active. remove it from active task status.
-    console.log("deleting", taskId);
+    console.log("deleting", props.id);
     props.appStateStore.setValue('activeTask', 0);
-    props.tableStore.setCell('task', taskId, 'deleted', true)
+    props.tableStore.setCell('task', props.id, 'deleted', true)
     // TODO: show UNDO toast
   }
 
@@ -239,7 +274,7 @@ const Task = (props) => {
                 rounded-full 
                 text-gray-400 hover:text-gray-500
               "
-              onClick={() => handleDeleteTask(props.id)}
+              onClick={() => handleDeleteTask()}
               >
               <TrashIcon className="h-5 w-5" aria-hidden="true" />
               <span className="sr-only">Delete</span>
@@ -262,14 +297,14 @@ const Task = (props) => {
           <ToggleButton 
             className='w-8 h-8' 
             buttonText="U" 
-            onClick={() => props.tableStore.setCell('task', props.id, 'urgent', !task.urgent)} 
-            selected={task.urgent}
+            onClick={handleToggleUrgent} 
+            selected={priorityIsUrgent(task.priority)}
           /> 
           <ToggleButton 
             className='w-8 h-8'
             buttonText="I" 
-            onClick={() => props.tableStore.setCell('task', props.id, 'important', !task.important)} 
-            selected={task.important} 
+            onClick={handleToggleImportant} 
+            selected={priorityIsImportant(task.priority)} 
           />
         </div>
       </div>
@@ -286,19 +321,39 @@ export default function Home() {
       .setTable('task', {
         0: { 
           important: false,
-          urgent: true,
+          urgent: false,
+          priority: 0,
           tag: "English",
           text: "chapter 10 reading",
           done: false,
           deleted: false,
         },
         1: {
-          important: false,
+          important: true,
           urgent: false,
+          priority: 1,
           tag: "Math",
           text: "study for quiz",
           done: false,
-          deleted: true,
+          deleted: false,
+        },
+        2: {
+          important: false,
+          urgent: true,
+          priority: 3,
+          tag: "Biology",
+          text: "Lab writeup",
+          done: false,
+          deleted: false,
+        },
+        3: {
+          important: true,
+          urgent: true,
+          priority: 2,
+          tag: "Biology",
+          text: "Lab writeup",
+          done: false,
+          deleted: false,
         }
       })
   });
@@ -341,6 +396,7 @@ export default function Home() {
       { 
         important: false,
         urgent: false,
+        priority: 0,
         tag: "",
         text: "add text here",
         done: false,
@@ -354,13 +410,18 @@ export default function Home() {
     appStateStore.setValue('activeTask', newRowId);
   }
   
+  const sortedIds = queries.getResultSortedRowIds('notDeleted', 'priority', false);
+  useEffect(() => {
+    console.log("sortedIds", sortedIds)
+  }, [sortedIds])
+
   return (
     <div>
       <h1>Task List</h1>
       {/* <div className="font-bold italic">all tables:</div> */}
       {/* {JSON.stringify(tables)} */}
-      {/* <div className="font-bold italic">tasks:</div> */}
-      {/* {JSON.stringify(tasks)} */}
+      <div className="font-bold italic">tasks:</div>
+      {JSON.stringify(tasks)}
       {/* <div className="font-bold italic">undeletedTaskIds:</div> */}
       {/* {JSON.stringify(undeletedTaskIds)} */}
 
@@ -372,7 +433,7 @@ export default function Home() {
       <div>
         {
           // tableStore.getRowIds('task').map((id) => {
-          queries.getResultRowIds('notDeleted').map((id) => {
+          sortedIds.map((id) => {
             return (
               <Task 
                 key={id}
