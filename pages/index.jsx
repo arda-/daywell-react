@@ -208,10 +208,9 @@ const Task = (props) => {
     // to be deleted, task was active. remove it from active task status.
     console.log("deleting", props.id);
     props.appStateStore.setValue('activeTask', 0);
-    props.tableStore.setCell('task', props.id, 'deleted', true)
+    props.tableStore.delRow('task', props.id);
     // TODO: show UNDO toast
   }
-
 
 
   const uneditableCenterArea = (
@@ -337,28 +336,24 @@ export default function Home() {
           tag: "English",
           text: "chapter 10 reading",
           done: false,
-          deleted: false,
         },
         1: {
           priority: 1,
           tag: "Math",
           text: "study for quiz",
           done: false,
-          deleted: false,
         },
         2: {
           priority: 3,
           tag: "Biology",
           text: "Lab writeup",
           done: false,
-          deleted: false,
         },
         3: {
           priority: 2,
           tag: "Music",
           text: "Theory worksheet",
           done: false,
-          deleted: false,
         }
       })
       // TODO eventually make this a RELATION instead!!
@@ -388,24 +383,23 @@ export default function Home() {
   });
 
 
-  const queries = useCreateQueries(tableStore, (tableStore) => {
-    console.log("queries created");
-    const queries = createQueries(tableStore).setQueryDefinition(
-      'notDeleted', // query name
-      'task', // table name
-      ({select, where}) => {
-        select('deleted');
-        where('deleted', false)
-      }
-    );
-    return queries;
-  });
+  // const queries = useCreateQueries(tableStore, (tableStore) => {
+  //   console.log("queries created");
+  //   const queries = createQueries(tableStore).setQueryDefinition(
+  //     'notDeleted', // query name
+  //     'task', // table name
+  //     ({select, where}) => {
+  //       select('deleted');
+  //       where('deleted', false)
+  //     }
+  //   );
+  //   return queries;
+  // });
 
 
 
   const tables = useTables(tableStore);
   const tasks = useTable('task', tableStore)
-  // const tasks = undeletedTaskTable;
   const values = useValues(appStateStore);
 
 
@@ -418,18 +412,17 @@ export default function Home() {
         tag: "",
         text: "add text here",
         done: false,
-        deleted: false,
       },
       false,  
     );
 
     console.log("all tasks", tableStore.getTable('task'))
-    console.log("undeletedTasks tasks", queries.getResultRowIds('notDeleted'))
     appStateStore.setValue('activeTask', newRowId);
   }
 
   const unsortedIds = tableStore.getRowIds('task');
-  const sortedIds = queries.getResultSortedRowIds('notDeleted', 'priority', false);
+
+  const sortedIds = tableStore.getSortedRowIds('task', 'priority', true);
   useEffect(() => {
     console.log("sortedIds", sortedIds)
   }, [sortedIds])
@@ -459,8 +452,6 @@ export default function Home() {
       {/* {JSON.stringify(tables)} */}
       {/* <div className="font-bold italic">tasks:</div> */}
       {/* {JSON.stringify(tasks)} */}
-      {/* <div className="font-bold italic">undeletedTaskIds:</div> */}
-      {/* {JSON.stringify(undeletedTaskIds)} */}
 
       <div className="font-bold italic">sortedIds:</div>
       {JSON.stringify(sortedIds)}
