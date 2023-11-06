@@ -3,7 +3,7 @@ import {
   CheckIcon, 
   ChevronDownIcon,
 } from '@heroicons/react/20/solid'
-import { useState, useEffect, useMemo, Fragment } from 'react';
+import { useState, useEffect, useMemo, useRef, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries, createIndexes } from 'tinybase';
@@ -11,6 +11,7 @@ import {
   useCreateStore, 
   useRow, 
   useValue, 
+  useStore,
   useTable, 
   useTables, 
   useValues, 
@@ -325,53 +326,75 @@ const Task = (props) => {
 
 
 
-export default function Home() {
-  const tableStore = useCreateStore(() => {
-    console.log('table store created');
-    return createStore()
-      .setTable('task', {
-        0: { 
-          priority: 0,
-          tag: "English",
-          text: "chapter 10 reading",
-          done: false,
-        },
-        1: {
-          priority: 1,
-          tag: "Math",
-          text: "study for quiz",
-          done: false,
-        },
-        2: {
-          priority: 3,
-          tag: "Biology",
-          text: "Lab writeup",
-          done: false,
-        },
-        3: {
-          priority: 2,
-          tag: "Music",
-          text: "Theory worksheet",
-          done: false,
-        }
-      })
-  });
+export default function App() {
+  let tableStore = useRef(null);
 
-  const appStateStore = useCreateStore(() => {
-    console.log('app state store created');
-    return createStore()
+  tableStore = useMemo(() => {
+    const store = createStore().setTable('task', {
+      0: { 
+        priority: 0,
+        tag: "English",
+        text: "chapter 10 reading",
+        done: false,
+      },
+      1: {
+        priority: 1,
+        tag: "Math",
+        text: "study for quiz",
+        done: false,
+      },
+      2: {
+        priority: 3,
+        tag: "Biology",
+        text: "Lab writeup",
+        done: false,
+      },
+      3: {
+        priority: 2,
+        tag: "Music",
+        text: "Theory worksheet",
+        done: false,
+      }
+    });
+
+    console.log('table store created')
+    console.log(JSON.stringify(store.getTables()));
+
+    return store;
+  }, [])
+
+
+  let appStateStore = useRef(null);
+  appStateStore = useMemo(() => {
+    const store = createStore()
       .setValues({
         activeTask: -1, 
         taskIdOrder: '',
-        displayOrderIsDirty: false,
-      })
-  });
+    });
+    console.log('appState store created')
+    console.log(JSON.stringify(store.getValues()));
+    return store;
+  }, [])
+  
+  const calcDisplayOrderString = () => appStateStore.getValue('taskIdOrder')
+  const calcDisplayOrderIds = () => JSON.parse(appStateStore.getValue('taskIdOrder'))
+  const [displayOrder, setDisplayOrder] = useState([])
 
+  useEffect(() => {
+    console.log("initialization useEffect")
 
+    const defaultDisplayOrder = tableStore.getRowIds('task');
+    console.log("deriving defaultDisplayOrder", defaultDisplayOrder);
+    appStateStore.setValue('taskIdOrder', JSON.stringify(defaultDisplayOrder))
+
+    console.log("displayOrderString", calcDisplayOrderString());
+    setDisplayOrder(calcDisplayOrderIds());
+  }, [])
+
+  
   const tables = useTables(tableStore);
-  const tasks = useTable('task', tableStore)
+  const tasks = useTable('task', tableStore);
   const values = useValues(appStateStore);
-
 
   const handleAddTask = () => {
     console.log("handleAddTask");
@@ -386,31 +409,35 @@ export default function Home() {
       false,  
     );
 
-    console.log("all tasks", tableStore.getTable('task'))
+    // console.log("all tasks", tableStore.getTable('task'))
     appStateStore.setValue('activeTask', newRowId);
   }
 
-  const sortedIds = tableStore.getSortedRowIds('task', 'priority', true);
-  appStateStore.setValue('taskIdOrder', JSON.stringify(sortedIds));
-  console.log("taskIdOrder", appStateStore.getValue('taskIdOrder'));
-  const taskIds = useValue('taskIdOrder', appStateStore);
 
-  const displayOrder = useMemo(() => {
-    return JSON.parse(taskIds)
-  }, [taskIds]);
+  const shouldUpdateDisplayOrder = (newDisplayOrder) => {
+    const newDisplayOrderString = JSON.stringify(newDisplayOrder);
+    return newDisplayOrderString !== calcDisplayOrderString();
+  }
+  
+  const calcNewOrder = () => tableStore.getSortedRowIds('task', 'priority', true);
 
-  // console.log("displayOrder", displayOrder);
+  const handleClickPrioritize = () => { 
+    // ask for the new propritized order from the table store
+    const newOrder = calcNewOrder();
+    if (shouldUpdateDisplayOrder(newOrder)) {
+      // update the app state variable with this new order
+      appStateStore.setValue('taskIdOrder', JSON.stringify(newOrder))
+      setDisplayOrder(calcDisplayOrderIds());
+    }
+  }
+
 
   return (
     <div>
       <h1>Task List</h1>
-      {/* <div className="font-bold italic">all tables:</div> */}
-      {/* {JSON.stringify(tables)} */}
-      {/* <div className="font-bold italic">tasks:</div> */}
-      {/* {JSON.stringify(tasks)} */}
 
-      <div className="font-bold italic">displayOrder:</div>
-      {JSON.stringify(displayOrder)}
+      <div className="font-bold italic">displayOrderString:</div>
+      {appStateStore.getValue('taskIdOrder')}
 
       <div className="font-bold italic">values:</div>
       {JSON.stringify(values)}
@@ -419,7 +446,7 @@ export default function Home() {
         {
           // unsortedIds.map((id) => {
           // sortedIds.map((id) => {
-          displayOrder.map((id) => {
+            displayOrder.map((id) => {
             return (
               <Task 
                 key={id}
@@ -435,6 +462,11 @@ export default function Home() {
         onClick={handleAddTask}
       >
         add new task
+      </button>
+      <button
+        onClick={handleClickPrioritize}
+      >
+        PRIORITIZE
       </button>
     </div>
   )
