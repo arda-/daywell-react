@@ -7,7 +7,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useResultRowIds, useDelRowCallback, useCreateQueries } from 'tinybase/ui-react';
+import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useResultRowIds, useDelRowCallback, useCreateQueries, useResultTable, useRowIds } from 'tinybase/ui-react';
 
 
 const ToggleButton = (props) => {
@@ -284,7 +284,7 @@ export default function Home() {
     console.log('table store created');
     return createStore()
       .setTable('task', {
-        1: { 
+        0: { 
           important: false,
           urgent: true,
           tag: "English",
@@ -292,7 +292,7 @@ export default function Home() {
           done: false,
           deleted: false,
         },
-        2: {
+        1: {
           important: false,
           urgent: false,
           tag: "Math",
@@ -307,7 +307,7 @@ export default function Home() {
     console.log('app state store created');
     return createStore()
       .setValues({
-        activeTask: 0, 
+        activeTask: -1, 
         sort: '', 
         order: '',
       })
@@ -316,7 +316,7 @@ export default function Home() {
 
   const queries = useCreateQueries(tableStore, (tableStore) => {
     console.log("queries created");
-    return createQueries(tableStore).setQueryDefinition(
+    const queries = createQueries(tableStore).setQueryDefinition(
       'notDeleted', // query name
       'task', // table name
       ({select, where}) => {
@@ -324,19 +324,18 @@ export default function Home() {
         where('deleted', false)
       }
     );
+    return queries;
   });
-
-  let undeletedTaskIds = useResultRowIds('notDeleted', queries);
-
-  console.log("undeleted task iDs", undeletedTaskIds);
 
 
   const tables = useTables(tableStore);
   const tasks = useTable('task', tableStore)
+  // const tasks = undeletedTaskTable;
   const values = useValues(appStateStore);
 
 
   const handleAddTask = () => {
+    console.log("handleAddTask");
     const newRowId = tableStore.addRow(
       'task', 
       { 
@@ -349,26 +348,31 @@ export default function Home() {
       },
       false,  
     );
+
+    console.log("all tasks", tableStore.getTable('task'))
+    console.log("undeletedTasks tasks", queries.getResultRowIds('notDeleted'))
     appStateStore.setValue('activeTask', newRowId);
   }
-
   
   return (
     <div>
       <h1>Task List</h1>
-      <div className="font-bold italic">all tables:</div>
-      {JSON.stringify(tables)}
-      <div className="font-bold italic">tasks:</div>
-      {JSON.stringify(tasks)}
-      <div className="font-bold italic">values:</div>
-      {JSON.stringify(values)}
+      {/* <div className="font-bold italic">all tables:</div> */}
+      {/* {JSON.stringify(tables)} */}
+      {/* <div className="font-bold italic">tasks:</div> */}
+      {/* {JSON.stringify(tasks)} */}
+      {/* <div className="font-bold italic">undeletedTaskIds:</div> */}
+      {/* {JSON.stringify(undeletedTaskIds)} */}
+
+      {/* <div className="font-bold italic">allTaskIds:</div> */}
+      {/* {JSON.stringify(allTaskIds)} */}
+
+      {/* <div className="font-bold italic">values:</div> */}
+      {/* {JSON.stringify(values)} */}
       <div>
         {
-          undeletedTaskIds.map((id) => {
           // tableStore.getRowIds('task').map((id) => {
-            // TODO: CHANGE THIS TO BE A QUERY FROM TINYBASE
-            // https://tinybase.org/api/ui-react/functions/queries-hooks/usecreatequeries/
-            // if (!tableStore.getCell('task', id, 'deleted'))
+          queries.getResultRowIds('notDeleted').map((id) => {
             return (
               <Task 
                 key={id}
