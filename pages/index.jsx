@@ -3,7 +3,7 @@ import {
   CheckIcon, 
   ChevronDownIcon,
 } from '@heroicons/react/20/solid'
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
 import { createStore, createQueries, createIndexes } from 'tinybase';
@@ -193,7 +193,6 @@ const Task = (props) => {
   const handleToggleUrgent = () => {
     // if the second bit is on, it's important
     if (priorityIsUrgent(task.priority)) {
-      console.log("and succeeded");
       // so clear out that second bit by SUBTRACTING TWO
       props.tableStore.setCell('task', props.id, 'priority', task.priority - 2)
     } else {
@@ -356,21 +355,6 @@ export default function Home() {
           done: false,
         }
       })
-      // TODO eventually make this a RELATION instead!!
-      .setTable('order', {
-        0: {
-          idTask: 0
-        },
-        1: {
-          idTask: 1
-        },
-        2: {
-          idTask: 2
-        },
-        3: {
-          idTask: 3
-        },
-      })
   });
 
   const appStateStore = useCreateStore(() => {
@@ -379,23 +363,9 @@ export default function Home() {
       .setValues({
         activeTask: -1, 
         taskIdOrder: '',
+        displayOrderIsDirty: false,
       })
   });
-
-
-  // const queries = useCreateQueries(tableStore, (tableStore) => {
-  //   console.log("queries created");
-  //   const queries = createQueries(tableStore).setQueryDefinition(
-  //     'notDeleted', // query name
-  //     'task', // table name
-  //     ({select, where}) => {
-  //       select('deleted');
-  //       where('deleted', false)
-  //     }
-  //   );
-  //   return queries;
-  // });
-
 
 
   const tables = useTables(tableStore);
@@ -420,30 +390,16 @@ export default function Home() {
     appStateStore.setValue('activeTask', newRowId);
   }
 
-  const unsortedIds = tableStore.getRowIds('task');
-
   const sortedIds = tableStore.getSortedRowIds('task', 'priority', true);
-  useEffect(() => {
-    console.log("sortedIds", sortedIds)
-  }, [sortedIds])
+  appStateStore.setValue('taskIdOrder', JSON.stringify(sortedIds));
+  console.log("taskIdOrder", appStateStore.getValue('taskIdOrder'));
+  const taskIds = useValue('taskIdOrder', appStateStore);
 
+  const displayOrder = useMemo(() => {
+    return JSON.parse(taskIds)
+  }, [taskIds]);
 
-  sortedIds.forEach((idTask, index) => {
-    console.log("inside forEach", idTask, index);
-    tableStore.setCell('displayOrder', index, 'idTask', idTask);
-  });
-
-
-  const indexes = createIndexes(tableStore);
-  indexes.setIndexDefinition(
-    'displayOrder',   // name/id of the index
-    'order',          // table that we're indexing into
-    'idTask',         // the cellId to index
-  );
-
-  console.log("display order SLICE", indexes.getSliceIds('displayOrder'))
-
-  const sliceIds = useSliceIds('displayOrder', indexes);
+  // console.log("displayOrder", displayOrder);
 
   return (
     <div>
@@ -453,16 +409,17 @@ export default function Home() {
       {/* <div className="font-bold italic">tasks:</div> */}
       {/* {JSON.stringify(tasks)} */}
 
-      <div className="font-bold italic">sortedIds:</div>
-      {JSON.stringify(sortedIds)}
+      <div className="font-bold italic">displayOrder:</div>
+      {JSON.stringify(displayOrder)}
 
-      {/* <div className="font-bold italic">values:</div> */}
-      {/* {JSON.stringify(values)} */}
+      <div className="font-bold italic">values:</div>
+      {JSON.stringify(values)}
+
       <div>
         {
           // unsortedIds.map((id) => {
           // sortedIds.map((id) => {
-          sliceIds.map((id) => {
+          displayOrder.map((id) => {
             return (
               <Task 
                 key={id}
