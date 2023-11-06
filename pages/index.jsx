@@ -236,14 +236,14 @@ const Task = (props) => {
     <>
       <div>
         <label htmlFor="text" className="sr-only">
-          Tag Text
+          Task Text
         </label>
         <input
           type="text"
           name="text"
           id="text"
           className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-600"
-          placeholder="tag text"
+          placeholder="task text"
           defaultValue={task.text}
         />
       </div>
@@ -473,9 +473,7 @@ export default function App() {
       {JSON.stringify(values)}
 
       <div>
-        task list component should be here:
         {displayOrderString && 
-
           <TaskList 
             taskIds={JSON.parse(displayOrderString)}
             tableStore={tableStore}
