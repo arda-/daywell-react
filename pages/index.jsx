@@ -6,8 +6,21 @@ import {
 import { useState, useEffect, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
-import { createStore, createQueries } from 'tinybase';
-import { useCreateStore, useRow, useValue, useTable, useTables, useValues, useResultRowIds, useDelRowCallback, useCreateQueries, useResultTable, useRowIds } from 'tinybase/ui-react';
+import { createStore, createQueries, createIndexes } from 'tinybase';
+import { 
+  useCreateStore, 
+  useRow, 
+  useValue, 
+  useTable, 
+  useTables, 
+  useValues, 
+  useSliceIds,
+  useSliceRowIds, 
+  useDelRowCallback, 
+  useCreateQueries, 
+  useResultTable, 
+  useRowIds 
+} from 'tinybase/ui-react';
 
 
 const priorityIsUrgent = (priority) => {
@@ -348,6 +361,21 @@ export default function Home() {
           deleted: false,
         }
       })
+      // TODO eventually make this a RELATION instead!!
+      .setTable('order', {
+        0: {
+          idTask: 0
+        },
+        1: {
+          idTask: 1
+        },
+        2: {
+          idTask: 2
+        },
+        3: {
+          idTask: 3
+        },
+      })
   });
 
   const appStateStore = useCreateStore(() => {
@@ -355,8 +383,7 @@ export default function Home() {
     return createStore()
       .setValues({
         activeTask: -1, 
-        sort: '', 
-        order: '',
+        taskIdOrder: '',
       })
   });
 
@@ -373,6 +400,7 @@ export default function Home() {
     );
     return queries;
   });
+
 
 
   const tables = useTables(tableStore);
@@ -399,31 +427,51 @@ export default function Home() {
     console.log("undeletedTasks tasks", queries.getResultRowIds('notDeleted'))
     appStateStore.setValue('activeTask', newRowId);
   }
-  
+
+  const unsortedIds = tableStore.getRowIds('task');
   const sortedIds = queries.getResultSortedRowIds('notDeleted', 'priority', false);
   useEffect(() => {
     console.log("sortedIds", sortedIds)
   }, [sortedIds])
+
+
+  sortedIds.forEach((idTask, index) => {
+    console.log("inside forEach", idTask, index);
+    tableStore.setCell('displayOrder', index, 'idTask', idTask);
+  });
+
+
+  const indexes = createIndexes(tableStore);
+  indexes.setIndexDefinition(
+    'displayOrder',   // name/id of the index
+    'order',          // table that we're indexing into
+    'idTask',         // the cellId to index
+  );
+
+  console.log("display order SLICE", indexes.getSliceIds('displayOrder'))
+
+  const sliceIds = useSliceIds('displayOrder', indexes);
 
   return (
     <div>
       <h1>Task List</h1>
       {/* <div className="font-bold italic">all tables:</div> */}
       {/* {JSON.stringify(tables)} */}
-      <div className="font-bold italic">tasks:</div>
-      {JSON.stringify(tasks)}
+      {/* <div className="font-bold italic">tasks:</div> */}
+      {/* {JSON.stringify(tasks)} */}
       {/* <div className="font-bold italic">undeletedTaskIds:</div> */}
       {/* {JSON.stringify(undeletedTaskIds)} */}
 
-      {/* <div className="font-bold italic">allTaskIds:</div> */}
-      {/* {JSON.stringify(allTaskIds)} */}
+      <div className="font-bold italic">sortedIds:</div>
+      {JSON.stringify(sortedIds)}
 
       {/* <div className="font-bold italic">values:</div> */}
       {/* {JSON.stringify(values)} */}
       <div>
         {
-          // tableStore.getRowIds('task').map((id) => {
-          sortedIds.map((id) => {
+          // unsortedIds.map((id) => {
+          // sortedIds.map((id) => {
+          sliceIds.map((id) => {
             return (
               <Task 
                 key={id}
