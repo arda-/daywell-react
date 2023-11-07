@@ -11,6 +11,7 @@ import {
   Fragment,
   createContext,
   useContext,
+  useCallback,
 } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
@@ -47,6 +48,25 @@ const priorityIsUrgent = (priority) => {
 const priorityIsImportant = (priority) => {
   return (priority & 0b01) === 0b01;
 }
+
+
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    // Cleanup function to clear the timeout on value change or unmount
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 
 const ToggleButton = (props) => {
 
@@ -255,6 +275,11 @@ const Task = (props) => {
     // console.log("value after changing", props.tableStore.getCell('task', props.id, 'idTag'))
   }
 
+  const handleChangeText = (e) => {
+    const newText = e.target.value
+    props.tableStore.setCell('task', props.id, 'text', newText);
+  }
+
   const uneditableCenterArea = (
     <div
     >
@@ -293,6 +318,7 @@ const Task = (props) => {
             focus:ring-2 focus:ring-inset focus:ring-amber-600"
           placeholder="task text"
           defaultValue={task.text}
+          onChange={handleChangeText}
           autoFocus
         />
       </div>
