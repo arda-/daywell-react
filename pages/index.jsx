@@ -119,7 +119,7 @@ export function TagDropdown(props) {
           inline-flex w-full justify-center 
           gap-x-1.5 rounded-md bg-white 
           px-2 py-1 
-          text-sm text-gray-800 
+          text-gray-700 
           ring-1 ring-inset ring-gray-300 
           hover:ring-amber-600 hover:rig-2
         " 
@@ -258,11 +258,17 @@ const Task = (props) => {
   const uneditableCenterArea = (
     <div
     >
-      <label htmlFor="comments" className="font-medium text-gray-900">
-        {task.text}
+      <label 
+        htmlFor="comments" 
+        className={classNames(
+          `text-lg`,
+          task.text ? 'font-medium text-gray-900' : 'font-normal text-gray-500'
+        )}
+      >
+        {task.text || "New Task"}
       </label>
       { task.idTag > 0 && 
-        <p id="comments-description" className="text-gray-500 text-sm">
+        <p id="comments-description" className="font-normal text-gray-500 tracking leading-none">
           {props.tableStore.getCell('tag',task.idTag,'text')}
         </p>
       }
@@ -279,9 +285,15 @@ const Task = (props) => {
           type="text"
           name="text"
           id="text"
-          className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-600"
+          className="
+            block w-full rounded-md border-0 py-1 
+            text-gray-900 font-medium text-lg
+            placeholder:text-gray-400
+            shadow-sm ring-1 ring-inset ring-gray-300  
+            focus:ring-2 focus:ring-inset focus:ring-amber-600"
           placeholder="task text"
           defaultValue={task.text}
+          autoFocus
         />
       </div>
       
@@ -517,7 +529,7 @@ export default function App() {
       { 
         priority: 0,
         idTag: 0,
-        text: "add text here",
+        text: "",
         done: false,
       },
       false,  
@@ -528,7 +540,7 @@ export default function App() {
     
     // add it to the displayOrder list
     appStateStore.setValue('taskIdOrder', JSON.stringify(calcNewOrder()));
-    
+
     // TODO: scroll to this item
   }
   
