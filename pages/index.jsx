@@ -182,13 +182,17 @@ export function TagDropdown(props) {
 const Task = (props) => {
 
   let task = useRow('task', props.id, props.tableStore);
-  let editing = useValue('activeTask', props.appStateStore) == props.id;
+  const idActiveTask = useValue('activeTask', props.appStateStore)
+
+  const editing = useMemo(() => {
+    return props.id === idActiveTask
+  }, [props.id, idActiveTask])
 
   const toggleEditing = () => {
     if (!editing) {
       props.appStateStore.setValue('activeTask', props.id);
     } else {
-      // props.appStateStore.setValue('activeTask', 0);
+      props.appStateStore.setValue('activeTask', -1);
     }
   }
 
