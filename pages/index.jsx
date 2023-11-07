@@ -35,7 +35,8 @@ import {
   useResultTable, 
   useRowIds, 
   useLocalRowIds,
-  useCreateIndexes
+  useCreateIndexes,
+  useCell
 } from 'tinybase/ui-react';
 
 
@@ -78,9 +79,12 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Dropdown(props) {
 
-  const { tableStore, activeTag } = props;
+// TODO: one day, seperate this into a generic Dropdown component
+// and wrap it in it's provided data
+export function TagDropdown(props) {
+
+  const { tableStore, idActiveTag } = props;
 
   let indexes = useCreateIndexes(tableStore, () => {
     return createIndexes(tableStore).setIndexDefinition(
@@ -90,17 +94,23 @@ export function Dropdown(props) {
     );
   });
 
+  let tags = useSliceIds('tagText', indexes);
+  const activeTagText = useCell('tag', idActiveTag, 'text', tableStore)
 
-  let tagList = useSliceIds('tagText', indexes);
-
-  const tags = ["None"].concat(tagList);
+  const isActive = useMemo(() => {
+    return (tag) => {
+      return tag === activeTagText
+    }
+  }, [activeTagText])
 
 
   function handleClickItem(tagText) {
-    if (tagText != activeTag) {
-      props.onChange(tagText)
+    if (!isActive(tagText)) {
+      // convert back out to a number because the 'tag' table is keyed by numbers
+      props.onChange(tags.indexOf(tagText))
     }
   }
+
 
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -114,7 +124,7 @@ export function Dropdown(props) {
           hover:ring-amber-600 hover:rig-2
         " 
         >
-          {tags.filter(t => t == activeTag) || "None"}
+          {activeTagText}
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
         </Menu.Button>
       </div>
@@ -136,7 +146,7 @@ export function Dropdown(props) {
                   <button
                     href={'#'}
                     className={classNames(
-                      tag == activeTag ? 'bg-amber-50 text-gray-900' : 'text-gray-700',
+                      isActive(tag) ? 'bg-amber-50 text-gray-900' : 'text-gray-700',
                       'px-4 py-2 text-sm',
                       'hover:bg-amber-100',
                       'w-full text-left flex justify-between'
@@ -146,11 +156,11 @@ export function Dropdown(props) {
                     <span>
                       {tag || "None"}
                     </span>
-                    {tag == activeTag && (
+                    {isActive(tag) && (
                       <span
                         className={classNames(
                           'inset-y top-0 right-0 flex items-center',
-                          tag == activeTag ? 'text-amber-900' : 'text-indigo-600'
+                          isActive(tag) ? 'text-amber-900' : 'text-indigo-600'
                         )}
                       >
                         <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -225,6 +235,13 @@ const Task = (props) => {
   }
 
 
+  const handleChangeTag = (idSelectedTag) => {
+    // console.log("handleChangeTag", idSelectedTag)
+    // console.log("value before changing", props.tableStore.getCell('task', props.id, 'idTag'))
+    props.tableStore.setCell('task', props.id, 'idTag', idSelectedTag);
+    // console.log("value after changing", props.tableStore.getCell('task', props.id, 'idTag'))
+  }
+
   const uneditableCenterArea = (
     <div
     >
@@ -257,10 +274,10 @@ const Task = (props) => {
       
       <div>
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
-        <Dropdown
-          activeTag={task.idTag}
+        <TagDropdown
+          idActiveTag={task.idTag}
           tableStore={props.tableStore}
-          onChange={(selectedTag) => props.tableStore.setCell('task', props.id, 'tag', selectedTag)} 
+          onChange={handleChangeTag} 
         />
       </div>
     </>
@@ -351,7 +368,7 @@ const TaskList = (props) => {
           tableStore={tableStore}
           appStateStore={appStateStore}
         />
-      ))}f
+      ))}
     </>
   );
 }
