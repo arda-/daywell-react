@@ -235,6 +235,15 @@ const Task = (props) => {
     // to be deleted, task was active. remove it from active task status.
     props.appStateStore.setValue('activeTask', 0);
     props.tableStore.delRow('task', props.id);
+
+    // now we have to update the UI to also not show this item anymore
+    const orderString = props.appStateStore.getValue('taskIdOrder');
+    const orderIds = JSON.parse(orderString);
+    const indexToRemove = orderIds.indexOf(props.id);
+    orderIds.splice(indexToRemove, 1);
+    const newOrderString = JSON.stringify(orderIds);
+    props.appStateStore.setValue('taskIdOrder', newOrderString);
+
     // TODO: show UNDO toast
   }
 
