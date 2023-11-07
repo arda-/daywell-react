@@ -14,7 +14,12 @@ import {
 } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
-import { createStore, createQueries, createIndexes } from 'tinybase';
+import { 
+  createIndexes,
+  createQueries, 
+  createRelationships,
+  createStore, 
+} from 'tinybase';
 import { 
   useCreateStore, 
   useRow, 
@@ -28,7 +33,8 @@ import {
   useDelRowCallback, 
   useCreateQueries, 
   useResultTable, 
-  useRowIds 
+  useRowIds, 
+  useLocalRowIds
 } from 'tinybase/ui-react';
 
 
@@ -227,7 +233,7 @@ const Task = (props) => {
         {task.text}
       </label>
       <p id="comments-description" className="text-gray-500 text-sm">
-        {task.tag}
+        {props.tableStore.getCell('tag',task.idTag,'text')}
       </p>
     </div>
   );
@@ -251,7 +257,7 @@ const Task = (props) => {
       <div>
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <Dropdown
-          activeTag={task.tag}
+          activeTag={task.idTag}
           onChange={(selectedTag) => props.tableStore.setCell('task', props.id, 'tag', selectedTag)} 
         />
       </div>
@@ -356,29 +362,35 @@ export default function App() {
     const store = createStore().setTable('task', {
       0: { 
         priority: 0,
-        tag: "English",
+        idTag: 1,
         text: "chapter 10 reading",
         done: false,
       },
       1: {
         priority: 1,
-        tag: "Math",
+        idTag: 0,
         text: "study for quiz",
         done: false,
       },
       2: {
         priority: 3,
-        tag: "Biology",
+        idTag: 2,
         text: "Lab writeup",
         done: false,
       },
       3: {
         priority: 2,
-        tag: "Music",
+        idTag: 0,
         text: "Theory worksheet",
         done: false,
       }
-    });
+    }).setTable('tag', {
+      0: { text: "Math" },
+      1: { text: "English" },
+      2: { text: "Biology" },
+      3: { text: "Music" },
+      // todo: eventually change these so the text is the key, and the content has info about the tag color
+    })
 
     console.log('table store created')
     console.log(JSON.stringify(store.getTables()));
@@ -386,6 +398,41 @@ export default function App() {
     return store;
   }, [])
 
+
+  let relationships = useRef(null); 
+  relationships = useMemo(() => {
+    const rel = createRelationships(tableStore);
+
+    rel.setRelationshipDefinition(
+      'task_tag', // relationship ID
+      'task',     // localtable
+      'tag',      // foregin table
+      'tag'      // the cell of the local table that the foreign key will replace
+    );
+    
+
+    return rel;
+  }, []);
+
+  console.log("local table:", relationships.getLocalTableId('task_tag'))
+  console.log("foreign table:", relationships.getRemoteTableId('task_tag'))
+
+  const localRowIds = relationships.getLocalRowIds('task_tag', '0');
+  console.log("localRowIds:", localRowIds, localRowIds.map((id) => tableStore.getCell('task', id, 'text')))
+  
+  const remoteRowId = relationships.getRemoteRowId('task_tag', '0');
+  console.log("remoteRowId:", remoteRowId, tableStore.getCell('tag', remoteRowId, 'text'));
+
+
+
+  // console.log("remote row text:", tableStore.getCell('task', remoteRowId, 'text'));
+
+  // console.log(tableStore.getRow('tag', '0'));
+  // console.log(tableStore.getRow('task', '0'));
+  // console.log("relationship", relationships.getLocalRowIds('task_tag', '0'));
+
+  // const test = useLocalRowIds('task_tag', '0', relationships);
+  // console.log('test', test);
 
   let appStateStore = useRef(null);
   appStateStore = useMemo(() => {
