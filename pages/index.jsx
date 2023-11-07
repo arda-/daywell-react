@@ -231,9 +231,11 @@ const Task = (props) => {
       <label htmlFor="comments" className="font-medium text-gray-900">
         {task.text}
       </label>
-      <p id="comments-description" className="text-gray-500 text-sm">
-        {props.tableStore.getCell('tag',task.idTag,'text')}
-      </p>
+      { task.idTag > 0 && 
+        <p id="comments-description" className="text-gray-500 text-sm">
+          {props.tableStore.getCell('tag',task.idTag,'text')}
+        </p>
+      }
     </div>
   );
 
@@ -387,7 +389,7 @@ export default function App() {
       4: {
         priority: 2,
         idTag: 0,
-        text: "Tale out trash",
+        text: "Take out trash",
         done: false,
       }
     }).setTable('tag', {
