@@ -34,7 +34,8 @@ import {
   useCreateQueries, 
   useResultTable, 
   useRowIds, 
-  useLocalRowIds
+  useLocalRowIds,
+  useCreateIndexes
 } from 'tinybase/ui-react';
 
 
@@ -79,24 +80,24 @@ function classNames(...classes) {
 
 export function Dropdown(props) {
 
-  const tags = [
-    {
-      link: "#",
-      text: ""
-    },
-    {
-      link: "#",
-      text: "English"
-    },
-    {
-      link: "#",
-      text: "Math"
-    }
-  ]
+  const { tableStore, activeTag } = props;
+
+  let indexes = useCreateIndexes(tableStore, () => {
+    return createIndexes(tableStore).setIndexDefinition(
+      'tagText',
+      'tag',
+      'text'
+    );
+  });
+
+
+  let tagList = useSliceIds('tagText', indexes);
+
+  const tags = ["None"].concat(tagList);
+
 
   function handleClickItem(tagText) {
-    // console.log("handleClickItem", tagText);
-    if (tagText != props.activeTag) {
+    if (tagText != activeTag) {
       props.onChange(tagText)
     }
   }
@@ -113,7 +114,7 @@ export function Dropdown(props) {
           hover:ring-amber-600 hover:rig-2
         " 
         >
-          {tags.filter(t => t.text == props.activeTag).text || "None"}
+          {tags.filter(t => t == activeTag) || "None"}
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
         </Menu.Button>
       </div>
@@ -131,25 +132,25 @@ export function Dropdown(props) {
           className="absolute left-0 z-10 mt-2 w-48 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             {tags.map(tag => 
-              <Menu.Item key={tag.text}>
+              <Menu.Item key={tag}>
                   <button
-                    href={tag.link}
+                    href={'#'}
                     className={classNames(
-                      tag.text == props.activeTag ? 'bg-amber-50 text-gray-900' : 'text-gray-700',
+                      tag == activeTag ? 'bg-amber-50 text-gray-900' : 'text-gray-700',
                       'px-4 py-2 text-sm',
                       'hover:bg-amber-100',
                       'w-full text-left flex justify-between'
                     )}
-                    onClick={() => handleClickItem(tag.text)}
+                    onClick={() => handleClickItem(tag)}
                   >
                     <span>
-                      {tag.text || "None"}
+                      {tag || "None"}
                     </span>
-                    {tag.text == props.activeTag && (
+                    {tag == activeTag && (
                       <span
                         className={classNames(
                           'inset-y top-0 right-0 flex items-center',
-                          tag.text == props.activeTag ? 'text-amber-900' : 'text-indigo-600'
+                          tag == activeTag ? 'text-amber-900' : 'text-indigo-600'
                         )}
                       >
                         <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -175,7 +176,6 @@ const Task = (props) => {
 
   const toggleEditing = () => {
     if (!editing) {
-      console.log("begin editing", task.text)
       props.appStateStore.setValue('activeTask', props.id);
     } else {
       // props.appStateStore.setValue('activeTask', 0);
@@ -219,7 +219,6 @@ const Task = (props) => {
 
   const handleDeleteTask = () => {
     // to be deleted, task was active. remove it from active task status.
-    console.log("deleting", props.id);
     props.appStateStore.setValue('activeTask', 0);
     props.tableStore.delRow('task', props.id);
     // TODO: show UNDO toast
@@ -258,6 +257,7 @@ const Task = (props) => {
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <Dropdown
           activeTag={task.idTag}
+          tableStore={props.tableStore}
           onChange={(selectedTag) => props.tableStore.setCell('task', props.id, 'tag', selectedTag)} 
         />
       </div>
@@ -349,7 +349,7 @@ const TaskList = (props) => {
           tableStore={tableStore}
           appStateStore={appStateStore}
         />
-      ))}
+      ))}f
     </>
   );
 }
@@ -368,7 +368,7 @@ export default function App() {
       },
       1: {
         priority: 1,
-        idTag: 0,
+        idTag: 3,
         text: "study for quiz",
         done: false,
       },
@@ -380,20 +380,25 @@ export default function App() {
       },
       3: {
         priority: 2,
-        idTag: 0,
+        idTag: 1,
         text: "Theory worksheet",
+        done: false,
+      },
+      4: {
+        priority: 2,
+        idTag: 0,
+        text: "Tale out trash",
         done: false,
       }
     }).setTable('tag', {
-      0: { text: "Math" },
-      1: { text: "English" },
-      2: { text: "Biology" },
-      3: { text: "Music" },
+      0: { text: "None" },
+      1: { text: "Math" },
+      2: { text: "English" },
+      3: { text: "Biology" },
+      4: { text: "Music" },
       // todo: eventually change these so the text is the key, and the content has info about the tag color
     })
 
-    console.log('table store created')
-    console.log(JSON.stringify(store.getTables()));
 
     return store;
   }, [])
@@ -414,25 +419,16 @@ export default function App() {
     return rel;
   }, []);
 
-  console.log("local table:", relationships.getLocalTableId('task_tag'))
-  console.log("foreign table:", relationships.getRemoteTableId('task_tag'))
 
   const localRowIds = relationships.getLocalRowIds('task_tag', '0');
-  console.log("localRowIds:", localRowIds, localRowIds.map((id) => tableStore.getCell('task', id, 'text')))
   
   const remoteRowId = relationships.getRemoteRowId('task_tag', '0');
-  console.log("remoteRowId:", remoteRowId, tableStore.getCell('tag', remoteRowId, 'text'));
 
 
 
-  // console.log("remote row text:", tableStore.getCell('task', remoteRowId, 'text'));
 
-  // console.log(tableStore.getRow('tag', '0'));
-  // console.log(tableStore.getRow('task', '0'));
-  // console.log("relationship", relationships.getLocalRowIds('task_tag', '0'));
 
   // const test = useLocalRowIds('task_tag', '0', relationships);
-  // console.log('test', test);
 
   let appStateStore = useRef(null);
   appStateStore = useMemo(() => {
@@ -441,8 +437,6 @@ export default function App() {
         activeTask: -1, 
         taskIdOrder: '',
     });
-    console.log('appState store created')
-    console.log(JSON.stringify(store.getValues()));
     return store;
   }, [])
   
@@ -454,15 +448,11 @@ export default function App() {
 
   const displayOrderString = useValue('taskIdOrder', appStateStore);
 
-
   useEffect(() => {
-    console.log("initialization useEffect")
 
     const defaultDisplayOrder = tableStore.getRowIds('task');
-    console.log("deriving defaultDisplayOrder", defaultDisplayOrder);
     appStateStore.setValue('taskIdOrder', JSON.stringify(defaultDisplayOrder))
 
-    console.log("displayOrderString", calcDisplayOrderString());
   }, [])
 
   
@@ -471,7 +461,6 @@ export default function App() {
   const values = useValues(appStateStore);
 
   const handleAddTask = () => {
-    console.log("handleAddTask");
     const newRowId = tableStore.addRow(
       'task', 
       { 
@@ -483,7 +472,6 @@ export default function App() {
       false,  
     );
 
-    // console.log("all tasks", tableStore.getTable('task'))
     appStateStore.setValue('activeTask', newRowId);
   }
 
@@ -503,6 +491,9 @@ export default function App() {
       appStateStore.setValue('taskIdOrder', JSON.stringify(newOrder))
     }
   }
+
+
+  
 
 
   return (
