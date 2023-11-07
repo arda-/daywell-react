@@ -492,20 +492,6 @@ export default function App() {
   const tasks = useTable('task', tableStore);
   const values = useValues(appStateStore);
 
-  const handleAddTask = () => {
-    const newRowId = tableStore.addRow(
-      'task', 
-      { 
-        priority: 0,
-        tag: "",
-        text: "add text here",
-        done: false,
-      },
-      false,  
-    );
-
-    appStateStore.setValue('activeTask', newRowId);
-  }
 
 
   const shouldUpdateDisplayOrder = (newDisplayOrder) => {
@@ -525,6 +511,26 @@ export default function App() {
   }
 
 
+  const handleAddTask = () => {
+    const newRowId = tableStore.addRow(
+      'task', 
+      { 
+        priority: 0,
+        idTag: 0,
+        text: "add text here",
+        done: false,
+      },
+      false,  
+    );
+
+    // make the new item active
+    appStateStore.setValue('activeTask', newRowId);
+    
+    // add it to the displayOrder list
+    appStateStore.setValue('taskIdOrder', JSON.stringify(calcNewOrder()));
+    
+    // TODO: scroll to this item
+  }
   
 
 
