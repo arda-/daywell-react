@@ -106,6 +106,8 @@ export function TagDropdown(props) {
 
   const { tableStore, idActiveTag } = props;
 
+
+
   let indexes = useCreateIndexes(tableStore, () => {
     return createIndexes(tableStore).setIndexDefinition(
       'tagText',
@@ -131,10 +133,22 @@ export function TagDropdown(props) {
     }
   }
 
+  function handleClickMenu(event) {
+    event.stopPropagation();
+    // console.log("emitting onClick");
+    props.onClick(event);
+  }
+
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
+    <Menu 
+      as="div" 
+      className="relative inline-block text-left"
+      onClick={handleClickMenu}
+    >
+      <div
+        onClick={handleClickMenu}
+      >
         <Menu.Button className="
           inline-flex w-full justify-center 
           gap-x-1.5 rounded-md bg-white 
@@ -208,10 +222,29 @@ const Task = (props) => {
     return props.id === idActiveTask
   }, [props.id, idActiveTask])
 
-  const toggleEditing = () => {
+  
+  const taskTextRef = useRef(null)  
+  const taskTagMenuRef = useRef(null)  
+
+  const handleClickTaskBody = (event) => {
+    console.log("task body found a click!");
     if (!editing) {
       props.appStateStore.setValue('activeTask', props.id);
     } else {
+      // // if we're editing and we've clicked into any of the menu items,
+      // // we won't want the task to close.
+      // if (
+      //   taskTextRef.current && 
+      //   taskTextRef.current.contains(event.target) &&
+      //   taskTagMenuRef.current &&
+      //   taskTagMenuRef.current.contains(event.target)
+      // ) {
+      //   // do nothing
+      //   // console.log("input was clicked, do not close")
+      // } else {
+      //   // we do want the task to close.
+      //   console.log("body click without input, close");
+      // }
       props.appStateStore.setValue('activeTask', -1);
     }
   }
@@ -280,6 +313,16 @@ const Task = (props) => {
     props.tableStore.setCell('task', props.id, 'text', newText);
   }
 
+  const handleClickTextBox = (event) => {
+    console.log("clicked text box, blocking propagation");
+    event.stopPropagation();
+  }
+
+  function handleClickTagMenu(event) {
+    // console.log("clicked tag menu, blockign propagation");
+    // event.stopPropagation();
+  }
+
   const uneditableCenterArea = (
     <div
     >
@@ -307,6 +350,7 @@ const Task = (props) => {
           Task Text
         </label>
         <input
+          ref={taskTextRef}
           type="text"
           name="text"
           id="text"
@@ -319,16 +363,20 @@ const Task = (props) => {
           placeholder="task text"
           defaultValue={task.text}
           onChange={handleChangeText}
+          onClick={(handleClickTextBox)}
           autoFocus
         />
       </div>
       
-      <div>
+      <div
+        ref={taskTagMenuRef}
+      >
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <TagDropdown
           idActiveTag={task.idTag}
           tableStore={props.tableStore}
           onChange={handleChangeTag} 
+          onClick={() => {}}
         />
       </div>
     </>
@@ -376,15 +424,14 @@ const Task = (props) => {
             </button>
           }
         </div>
-        <div 
-          className='
+        <div className='
             ml-1 py-1 px-2
             leading-6 w-full 
             hover:bg-amber-100 active:bg-amber-200 
             rounded-md 
             cursor-pointer
             flex flex-col items-start'
-          onClick={toggleEditing}
+          onClick={handleClickTaskBody}
         >
           {editing ? editableCenterArea : uneditableCenterArea}
         </div>
