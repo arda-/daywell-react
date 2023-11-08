@@ -396,29 +396,17 @@ const Task = (props) => {
     if (!editing) {
       props.appStateStore.setValue('activeTask', props.id);
     } else {
-      // // if we're editing and we've clicked into any of the menu items,
-      // // we won't want the task to close.
-      // if (
-      //   taskTextRef.current && 
-      //   taskTextRef.current.contains(event.target) &&
-      //   taskTagMenuRef.current &&
-      //   taskTagMenuRef.current.contains(event.target)
-      // ) {
-      //   // do nothing
-      //   // console.log("input was clicked, do not close")
-      // } else {
-      //   // we do want the task to close.
-      //   console.log("body click without input, close");
-      // }
       props.appStateStore.setValue('activeTask', -1);
     }
   }
 
   const taskClasses = `
     px-3 py-1 my-2 
-    rounded-lg
+    rounded-xl
     hover:bg-amber-50
-    ${editing && "shadow-md bg-amber-50"}
+    hover:ring-1 hover:shadow-sm
+    ring-inset ring-amber-100/25
+    ${editing && "shadow-md hover:shadow-md bg-amber-50 ring-1 ring-amber-100/50"}
   `;
 
   const centerAreaClasses = `
