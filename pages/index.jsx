@@ -68,6 +68,88 @@ function useDebounce(value, delay) {
 }
 
 
+const Button = (props) => {
+  const { rounded, circular, primary, soft, size } = props;
+
+  let rounding = ''
+  let text = 'font-semibold text-white'
+  let colors = 'bg-amber-600'
+  let shadow = 'shadow-sm'
+  let spacing = ''
+  let active = ''
+  let focus = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600'
+  let hover = 'hover:bg-amber-500'
+
+  switch (size) {
+    case "xs":
+      rounding = 'rounded';
+      text += ' text-xs'
+      spacing = 'px-2 py-1';
+      break;
+    case "sm":
+      rounding = 'rounded';
+      text += ' text-sm'
+      spacing = 'px-2 py-1';
+      break;
+    default:
+    case "md":
+      rounding = "rounded-md";
+      text += ' text-sm'
+      spacing = 'px-2.5 py-1.5';
+      break;
+    case "lg":
+      rounding = "rounded-md";
+      spacing = 'px-3 py-2';
+      break;
+    case "xl":
+      rounding = "rounded-lg";
+      spacing = 'px-3.5 py-2.5';
+      break;
+  }
+
+  if (rounded) {
+    rounding = 'rounded-full'
+  }
+
+
+
+
+  return (
+    <>
+
+      <button
+        className={classNames(
+          rounding, text, colors, spacing, shadow, active, hover, focus
+        )} 
+        type="button"
+      >
+        testButton
+      </button>
+    </>
+  )
+}
+
+const ButtonsDemo = () => {
+  return (
+    <div>
+      <div>
+        <Button size='xs' />
+        <Button size='sm' />
+        <Button size='md' />
+        <Button size='lg' />
+        <Button size='xl' />
+      </div>
+      <div className="mt-2">
+        <Button rounded size='xs' />
+        <Button rounded size='sm' />
+        <Button rounded size='md' />
+        <Button rounded size='lg' />
+        <Button rounded size='xl' />
+      </div> 
+    </div>
+  )
+}
+
 const ToggleButton = (props) => {
 
   const styleClasses = `
@@ -194,7 +276,7 @@ export function TagDropdown(props) {
                       <span
                         className={classNames(
                           'inset-y top-0 right-0 flex items-center',
-                          isActive(tag) ? 'text-amber-900' : 'text-indigo-600'
+                          isActive(tag) ? 'text-amber-900' : 'text-amber-600'
                         )}
                       >
                         <CheckIcon className="h-5 w-5" aria-hidden="true" />
@@ -209,6 +291,7 @@ export function TagDropdown(props) {
     </Menu>
   )
 }
+
 
 
 
@@ -651,13 +734,14 @@ export default function App() {
       <button
         onClick={handleAddTask}
       >
-        add new task
+        Create Task
       </button>
       <button
         onClick={handleClickPrioritize}
       >
         PRIORITIZE
       </button>
+      <ButtonsDemo />
     </div>
   )
 }
