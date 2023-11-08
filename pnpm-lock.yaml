@@ -45,8 +45,8 @@ dependencies:
     specifier: link:@heroicons/react/20/solid
     version: link:@heroicons/react/20/solid
   tinybase:
-    specifier: ^4.3.23
-    version: 4.3.23(react-dom@18.2.0)(react@18.2.0)
+    specifier: 4.3.21
+    version: 4.3.21(react-dom@18.2.0)(react@18.2.0)
   typescript:
     specifier: 4.9.5
     version: 4.9.5
@@ -2435,8 +2435,8 @@ packages:
     dependencies:
       any-promise: 1.3.0
 
-  /tinybase@4.3.23(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-FMIudie7w/1Qi56l5ZspA0SjjQi9Z8UO+WlLcfJvbXLCHz8MUYKrs1bBSZkPO7y79TP3iKSpISa2qzisD/KkeA==}
+  /tinybase@4.3.21(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-k5jb5I7/2glG8W13TbU/3YMRM4LR+1FsJixFaqRyfqQAn71usC6iF0G5+DO2UnZd16Scg2qx5doO8h6P0zuYTA==}
     hasBin: true
     peerDependencies:
       '@sqlite.org/sqlite-wasm': ^3.43.2-build1

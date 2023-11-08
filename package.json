@@ -22,7 +22,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "solid": "link:@heroicons/react/20/solid",
-    "tinybase": "^4.3.23",
+    "tinybase": "4.3.21",
     "typescript": "4.9.5"
   },
   "devDependencies": {
