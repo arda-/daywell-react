@@ -484,6 +484,12 @@ const Task = (props) => {
     event.stopPropagation();
   }
 
+  function handleTextboxKeypress(e) {
+    if (e.key === 'Enter') {
+      props.appStateStore.setValue('activeTask', -1);
+    }
+  }
+
   const uneditableCenterArea = (
     <div
       className='text-left leading-tight'
@@ -526,6 +532,7 @@ const Task = (props) => {
           defaultValue={task.text}
           onChange={handleChangeText}
           onClick={handleClickTextBox}
+          onKeyPress={handleTextboxKeypress}
           autoFocus
         />
       </div>
