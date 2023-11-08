@@ -512,12 +512,12 @@ const Task = (props) => {
 
   function handleMouseEnter() {
     setMouseIn(true)
-    console.log("mousIn", props.id);
+    props.appStateStore.setValue('hoveredTask', props.id);
   }
 
   function handleMouseLeave() {
     setMouseIn(false)
-    console.log("mouse out", props.id);
+    props.appStateStore.setValue('hoveredTask', -1);
   }
 
 
@@ -770,6 +770,7 @@ export default function App() {
     const store = createStore()
       .setValues({
         activeTask: -1, 
+        hoveredTask: -1,
         taskIdOrder: '',
     });
     return store;
@@ -790,44 +791,52 @@ export default function App() {
     const defaultDisplayOrder = tableStore.getRowIds('task');
     appStateStore.setValue('taskIdOrder', JSON.stringify(defaultDisplayOrder))
 
-    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keydown', handleKeydown);
+    document.addEventListener('keyup', handleKeyup);
     return () => {
-      document.removeEventListener('keydown', handleKeyPress);
+      document.removeEventListener('keydown', handleKeydown);
+      document.addEventListener('keyup', handleKeyup);
     };
-
   }, [])
 
 
-  const idActiveTask = useValue('activeTask', appStateStore)
-  const activeTaskPriority = useCell('task', idActiveTask, 'priority', tableStore);
+  let metaKeyDown = useRef(false)
+
+  // const idActiveTask = useValue('activeTask', appStateStore)
+  // const activeTaskPriority = useCell('task', idActiveTask, 'priority', tableStore);
+
   
-  const handleKeyPress = (event) => {
-    console.log("keypress detected");
-    if (idActiveTask > -1) {
+  const handleKeydown = (event) => {
+    console.log("keypress detected", event.key, event.metaKey);
+
+    if (event.metaKey) {
+      event.preventDefault()
+    };
+
+    const idActiveTask = appStateStore.getValue('activeTask');
+    const idHoveredTask = appStateStore.getValue('hoveredTask');
+
+    const targetTaskId = idActiveTask > -1 ? idActiveTask : idHoveredTask;
+    if (targetTaskId > -1) {
+      const targetTaskPriority = tableStore.getCell('task', targetTaskId, 'priority', tableStore);
+  
       if (event.metaKey && event.key === 'u') {
-        event.preventDefault();
-        toggleUrgent(idActiveTask, activeTaskPriority, tableStore)
+        toggleUrgent(targetTaskId, targetTaskPriority, tableStore)
       }
-  
+        
       if (event.metaKey && event.key === 'i') {
-        event.preventDefault();
-        toggleImportant(idActiveTask, activeTaskPriority, tableStore)
+        toggleImportant(targetTaskId, targetTaskPriority, tableStore)
       }
-    } else {
-      // console.log("Testing mousIn")
-      // if (mouseIn) {
-      //   if (event.metaKey && event.key === 'u') {
-      //     event.preventDefault();
-      //     toggleUrgent()
-      //   }
-    
-      //   if (event.metaKey && event.key === 'i') {
-      //     event.preventDefault();
-      //     toggleImportant()
-      //   }
-      // }
     }
   };
+
+  function handleKeyup(event) {
+    // console.log("keyup", event.key, event.metaKey)
+    if (event.metaKey) {
+      // console.log("setting metaKeyDown false because we got it up", metaKeyDown)
+      metaKeyDown = false
+    }
+  }
 
 
   const tables = useTables(tableStore);
