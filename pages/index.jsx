@@ -261,8 +261,11 @@ const Task = (props) => {
   `;
 
 
+  const handleClickCheckbox = (event) => {
+    event.stopPropagation(); 
+  }
   
-  const handleToggleImportant = () => {
+  const handleToggleImportant = (event) => {
     event.stopPropagation();
     // if it's odd, then it has an important bit already set
     if (priorityIsImportant(task.priority)) {
@@ -364,7 +367,7 @@ const Task = (props) => {
           placeholder="task text"
           defaultValue={task.text}
           onChange={handleChangeText}
-          onClick={(handleClickTextBox)}
+          onClick={handleClickTextBox}
           autoFocus
         />
       </div>
@@ -404,6 +407,7 @@ const Task = (props) => {
                 text-amber-600 focus:ring-amber-600
               "
               defaultChecked={task.done}
+              onClick={handleClickCheckbox}
               onChange={() => props.tableStore.setCell('task', props.id, 'done', !task.done)} 
             />
           </div>
