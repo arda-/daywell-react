@@ -267,6 +267,36 @@ function classNames(...classes) {
 }
 
 
+
+function toggleUrgent(idTask, currentPriority, tableStore) {
+  if (priorityIsUrgent(currentPriority)) {
+    // so clear out that second bit by SUBTRACTING TWO
+    tableStore.setCell('task', idTask, 'priority', currentPriority - 2)
+  } else {
+    // the second bit isn't on, so ADD TWO to turn that bit on.
+    tableStore.setCell('task', idTask, 'priority', currentPriority + 2)
+  }
+}
+
+
+function toggleImportant(idTask, currentPriority, tableStore) {
+  console.log("toggleImportant", idTask, currentPriority, tableStore)
+  let a = tableStore.getCell('task', idTask, 'priority', currentPriority - 1)
+  console.log("important before", a);
+  if (priorityIsImportant(currentPriority)) {
+    // so clear out that second bit by SUBTRACTING TWO
+    tableStore.setCell('task', idTask, 'priority', currentPriority - 1)
+  } else {
+    // if it's even, then it doesn't have the important bit set
+    // set the bottom bit to 1 by ADDING ONE
+    tableStore.setCell('task', idTask, 'priority', currentPriority + 1)
+  }
+  a = tableStore.getCell('task', idTask, 'priority', currentPriority - 1)
+  console.log("important after", a);
+}
+
+
+
 // TODO: one day, seperate this into a generic Dropdown component
 // and wrap it in it's provided data
 export function TagDropdown(props) {
@@ -427,37 +457,13 @@ const Task = (props) => {
   
   const handleToggleImportant = (event) => {
     event.stopPropagation();
-    toggleImportant();
-  }
-
-  function toggleImportant(){
-    // if it's odd, then it has an important bit already set
-    if (priorityIsImportant(task.priority)) {
-      // clear out the bottom bit by SUBTRACTING ONE
-      props.tableStore.setCell('task', props.id, 'priority', task.priority - 1)
-    } else {
-      // if it's even, then it doesn't have the important bit set
-      // set the bottom bit to 1 by ADDING ONE
-      props.tableStore.setCell('task', props.id, 'priority', task.priority + 1)
-    }
+    toggleImportant(props.id, task.priority, props.tableStore)
   }
 
   const handleToggleUrgent = (event) => {
     event.stopPropagation();
-    toggleUrgent();
+    toggleUrgent(props.id, task.priority, props.tableStore)
   }
-
-  function toggleUrgent() {
-    if (priorityIsUrgent(task.priority)) {
-      // so clear out that second bit by SUBTRACTING TWO
-      props.tableStore.setCell('task', props.id, 'priority', task.priority - 2)
-    } else {
-      // the second bit isn't on, so ADD TWO to turn that bit on.
-      props.tableStore.setCell('task', props.id, 'priority', task.priority + 2)
-    }
-  }
-
-
 
   const handleDeleteTask = () => {
     event.stopPropagation();
@@ -500,21 +506,7 @@ const Task = (props) => {
     }
   }
 
-  const handleKeyDown = (event) => {
-    if (editing) {
-      if (event.metaKey && event.key === 'u') {
-        event.preventDefault();
-        toggleUrgent()
-      }
-  
-      if (event.metaKey && event.key === 'i') {
-        event.preventDefault();
-        toggleImportant()
-      }
-    } else {
 
-    }
-  };
 
   const [mouseIn, setMouseIn] = useState(false);
 
@@ -608,7 +600,6 @@ const Task = (props) => {
       className={taskClasses}
       onFocusCapture={handleFocus}
       onBlur={handleBlur}  
-      onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -792,17 +783,58 @@ export default function App() {
 
   const displayOrderString = useValue('taskIdOrder', appStateStore);
 
+
+  
   useEffect(() => {
 
     const defaultDisplayOrder = tableStore.getRowIds('task');
     appStateStore.setValue('taskIdOrder', JSON.stringify(defaultDisplayOrder))
 
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+
   }, [])
 
+
+  const idActiveTask = useValue('activeTask', appStateStore)
+  const activeTaskPriority = useCell('task', idActiveTask, 'priority', tableStore);
   
+  const handleKeyPress = (event) => {
+    console.log("keypress detected");
+    if (idActiveTask > -1) {
+      if (event.metaKey && event.key === 'u') {
+        event.preventDefault();
+        toggleUrgent(idActiveTask, activeTaskPriority, tableStore)
+      }
+  
+      if (event.metaKey && event.key === 'i') {
+        event.preventDefault();
+        toggleImportant(idActiveTask, activeTaskPriority, tableStore)
+      }
+    } else {
+      // console.log("Testing mousIn")
+      // if (mouseIn) {
+      //   if (event.metaKey && event.key === 'u') {
+      //     event.preventDefault();
+      //     toggleUrgent()
+      //   }
+    
+      //   if (event.metaKey && event.key === 'i') {
+      //     event.preventDefault();
+      //     toggleImportant()
+      //   }
+      // }
+    }
+  };
+
+
   const tables = useTables(tableStore);
   const tasks = useTable('task', tableStore);
   const values = useValues(appStateStore);
+
+
 
 
 
