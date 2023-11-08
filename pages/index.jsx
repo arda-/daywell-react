@@ -69,32 +69,49 @@ function useDebounce(value, delay) {
 
 
 const Button = (props) => {
-  const { rounded, circular, primary, soft, size } = props;
+  const { shape, primary, soft, size, style } = props;
 
   let rounding = ''
-  let text = 'font-semibold text-white'
-  let colors = 'bg-amber-600'
+  let textWeight = 'font-semibold'
+  let textSize = ''
+  let textColor = ''
+  let bgColor = ''
   let shadow = 'shadow-sm'
   let spacing = ''
-  let active = ''
-  let focus = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600'
-  let hover = 'hover:bg-amber-500'
+  let ring = ''
+  let outline = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600'
+  let hover = ''
+
+  switch (style) {
+    case "primary":
+      bgColor = 'bg-amber-600 hover:bg-amber-500 active:bg-amber-500/80'
+      textColor = 'text-white'
+      break;
+    case "secondary":
+    default:
+      bgColor = 'bg-white hover:bg-gray-100 active:bg-gray-200'
+      textColor = 'text-gray-900'
+      ring = 'ring-1 ring-inset ring-gray-300'
+      break;
+    case "soft":
+
+  }
 
   switch (size) {
     case "xs":
       rounding = 'rounded';
-      text += ' text-xs'
+      textSize += ' text-xs'
       spacing = 'px-2 py-1';
       break;
     case "sm":
       rounding = 'rounded';
-      text += ' text-sm'
+      textSize += ' text-sm'
       spacing = 'px-2 py-1';
       break;
     default:
     case "md":
       rounding = "rounded-md";
-      text += ' text-sm'
+      textSize += ' text-sm'
       spacing = 'px-2.5 py-1.5';
       break;
     case "lg":
@@ -107,11 +124,17 @@ const Button = (props) => {
       break;
   }
 
-  if (rounded) {
-    rounding = 'rounded-full'
+  switch(shape) {
+    case "rounded":
+    case "circular":
+      rounding = 'rounded-full';
+      break;
   }
 
-
+  function handleOnClick(event) {
+    event.stopPropagation();
+    props.onClick();
+  }
 
 
   return (
@@ -119,32 +142,59 @@ const Button = (props) => {
 
       <button
         className={classNames(
-          rounding, text, colors, spacing, shadow, active, hover, focus
+          rounding, spacing,
+          textWeight, textSize, textColor, 
+          bgColor, ring, shadow, hover, outline
         )} 
         type="button"
+        onClick={handleOnClick}
       >
-        testButton
+        {props.children}
       </button>
     </>
   )
 }
 
-const ButtonsDemo = () => {
+const ButtonDemo = () => {
   return (
     <div>
+      default:
       <div>
-        <Button size='xs' />
-        <Button size='sm' />
-        <Button size='md' />
-        <Button size='lg' />
-        <Button size='xl' />
+        <Button size='xs' >Button Text</Button>
+        <Button size='sm' >Button Text</Button>
+        <Button size='md' >Button Text</Button>
+        <Button size='lg' >Button Text</Button>
+        <Button size='xl' >Button Text</Button>
+      </div>
+      primaries
+      <div>
+        <Button style="primary" size='xs' >Button Text</Button>
+        <Button style="primary" size='sm' >Button Text</Button>
+        <Button style="primary" size='md' >Button Text</Button>
+        <Button style="primary" size='lg' >Button Text</Button>
+        <Button style="primary" size='xl' >Button Text</Button>
       </div>
       <div className="mt-2">
-        <Button rounded size='xs' />
-        <Button rounded size='sm' />
-        <Button rounded size='md' />
-        <Button rounded size='lg' />
-        <Button rounded size='xl' />
+        <Button style="primary" shape='rounded' size='xs' >Button Text</Button>
+        <Button style="primary" shape='rounded' size='sm' >Button Text</Button>
+        <Button style="primary" shape='rounded' size='md' >Button Text</Button>
+        <Button style="primary" shape='rounded' size='lg' >Button Text</Button>
+        <Button style="primary" shape='rounded' size='xl' >Button Text</Button>
+      </div> 
+      secondaries
+      <div className="mt-2">
+        <Button style='secondary' size='xs' >Button Text</Button>
+        <Button style='secondary' size='sm' >Button Text</Button>
+        <Button style='secondary' size='md' >Button Text</Button>
+        <Button style='secondary' size='lg' >Button Text</Button>
+        <Button style='secondary' size='xl' >Button Text</Button>
+      </div>
+      <div className="mt-2">
+        <Button style='secondary' shape='rounded' size='xs' >Button Text</Button>
+        <Button style='secondary' shape='rounded' size='sm' >Button Text</Button>
+        <Button style='secondary' shape='rounded' size='md' >Button Text</Button>
+        <Button style='secondary' shape='rounded' size='lg' >Button Text</Button>
+        <Button style='secondary' shape='rounded' size='xl' >Button Text</Button>
       </div> 
     </div>
   )
@@ -741,7 +791,12 @@ export default function App() {
       >
         PRIORITIZE
       </button>
-      <ButtonsDemo />
+      <Button
+        onClick={handleAddTask}
+        >
+        Create Task
+      </Button>
+      <ButtonDemo />
     </div>
   )
 }
