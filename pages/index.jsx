@@ -822,8 +822,8 @@ export default function App() {
         Add Task
       </Button>
       <Button
-        disabled
         onClick={handleClickPrioritize}
+        // disabled
       >
         PRIORITIZE
       </Button>
