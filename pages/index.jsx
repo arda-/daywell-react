@@ -12,6 +12,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  use,
 } from 'react';
 import { Menu, Transition } from '@headlessui/react'
 
@@ -395,7 +396,6 @@ const Task = (props) => {
   const taskTagMenuRef = useRef(null)  
 
   const handleClickTaskBody = (event) => {
-    console.log("task body found a click!");
     if (!editing) {
       props.appStateStore.setValue('activeTask', props.id);
     } else {
@@ -418,12 +418,19 @@ const Task = (props) => {
   `;
 
 
+
+
+
   const handleClickCheckbox = (event) => {
     event.stopPropagation(); 
   }
   
   const handleToggleImportant = (event) => {
     event.stopPropagation();
+    toggleImportant();
+  }
+
+  function toggleImportant(){
     // if it's odd, then it has an important bit already set
     if (priorityIsImportant(task.priority)) {
       // clear out the bottom bit by SUBTRACTING ONE
@@ -437,7 +444,10 @@ const Task = (props) => {
 
   const handleToggleUrgent = (event) => {
     event.stopPropagation();
-    // if the second bit is on, it's important
+    toggleUrgent();
+  }
+
+  function toggleUrgent() {
     if (priorityIsUrgent(task.priority)) {
       // so clear out that second bit by SUBTRACTING TWO
       props.tableStore.setCell('task', props.id, 'priority', task.priority - 2)
@@ -489,6 +499,45 @@ const Task = (props) => {
       props.appStateStore.setValue('activeTask', -1);
     }
   }
+
+  const handleKeyDown = (event) => {
+    if (editing) {
+      if (event.metaKey && event.key === 'u') {
+        event.preventDefault();
+        toggleUrgent()
+      }
+  
+      if (event.metaKey && event.key === 'i') {
+        event.preventDefault();
+        toggleImportant()
+      }
+    } else {
+
+    }
+  };
+
+  const [mouseIn, setMouseIn] = useState(false);
+
+  function handleMouseEnter() {
+    setMouseIn(true)
+    console.log("mousIn", props.id);
+  }
+
+  function handleMouseLeave() {
+    setMouseIn(false)
+    console.log("mouse out", props.id);
+  }
+
+
+  function handleFocus(event) {
+    console.log("focused", props.id);
+  }
+
+  function handleBlur(event) {
+    console.log("blur", props.id);
+  }
+
+
 
   const uneditableCenterArea = (
     <div
@@ -555,7 +604,14 @@ const Task = (props) => {
 
 
   return (
-    <div className={taskClasses}>
+    <div 
+      className={taskClasses}
+      onFocusCapture={handleFocus}
+      onBlur={handleBlur}  
+      onKeyDown={handleKeyDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="relative flex">
         <div className='flex flex-col justify-center w-6'>
           <div className="flex flex-col justify-center">
