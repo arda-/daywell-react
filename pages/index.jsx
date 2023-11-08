@@ -69,22 +69,23 @@ function useDebounce(value, delay) {
 
 
 const Button = (props) => {
-  const { shape, primary, soft, size, style } = props;
+  const { shape, disabled, size, style,  } = props;
 
   let rounding = ''
   let textWeight = 'font-semibold'
   let textSize = ''
   let textColor = ''
   let bgColor = ''
-  let shadow = 'shadow-sm'
+  let shadow = 'shadow disabled:shadow-none'
   let spacing = ''
   let ring = ''
   let outline = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600'
   let hover = ''
+  let cursor = 'disabled:cursor-not-allowed'
 
   switch (style) {
     case "primary":
-      bgColor = 'bg-amber-600 hover:bg-amber-500 active:bg-amber-500/80'
+      bgColor = 'bg-amber-600 hover:bg-amber-500 active:bg-amber-500/80 disabled:bg-amber-600/70'
       textColor = 'text-white'
       break;
     case "secondary":
@@ -94,7 +95,7 @@ const Button = (props) => {
       ring = 'ring-1 ring-inset ring-gray-300'
       break;
     case "soft":
-
+      break;
   }
 
   switch (size) {
@@ -139,12 +140,13 @@ const Button = (props) => {
 
   return (
     <>
-
       <button
+        disabled={props.disabled}
         className={classNames(
           rounding, spacing,
           textWeight, textSize, textColor, 
-          bgColor, ring, shadow, hover, outline
+          bgColor, ring, shadow, hover, outline,
+          cursor,
         )} 
         type="button"
         onClick={handleOnClick}
@@ -175,11 +177,25 @@ const ButtonDemo = () => {
         <Button style="primary" size='xl' >Button Text</Button>
       </div>
       <div className="mt-2">
+        <Button disabled style="primary" size='xs' >Button Text</Button>
+        <Button disabled style="primary" size='sm' >Button Text</Button>
+        <Button disabled style="primary" size='md' >Button Text</Button>
+        <Button disabled style="primary" size='lg' >Button Text</Button>
+        <Button disabled style="primary" size='xl' >Button Text</Button>
+      </div>
+      <div className="mt-2">
         <Button style="primary" shape='rounded' size='xs' >Button Text</Button>
         <Button style="primary" shape='rounded' size='sm' >Button Text</Button>
         <Button style="primary" shape='rounded' size='md' >Button Text</Button>
         <Button style="primary" shape='rounded' size='lg' >Button Text</Button>
         <Button style="primary" shape='rounded' size='xl' >Button Text</Button>
+      </div> 
+      <div className="mt-2">
+        <Button disabled style="primary" shape='rounded' size='xs' >Button Text</Button>
+        <Button disabled style="primary" shape='rounded' size='sm' >Button Text</Button>
+        <Button disabled style="primary" shape='rounded' size='md' >Button Text</Button>
+        <Button disabled style="primary" shape='rounded' size='lg' >Button Text</Button>
+        <Button disabled style="primary" shape='rounded' size='xl' >Button Text</Button>
       </div> 
       secondaries
       <div className="mt-2">
@@ -189,12 +205,28 @@ const ButtonDemo = () => {
         <Button style='secondary' size='lg' >Button Text</Button>
         <Button style='secondary' size='xl' >Button Text</Button>
       </div>
+      disabled
+      <div className="mt-2">
+        <Button disabled style='secondary' size='xs' >Button Text</Button>
+        <Button disabled style='secondary' size='sm' >Button Text</Button>
+        <Button disabled style='secondary' size='md' >Button Text</Button>
+        <Button disabled style='secondary' size='lg' >Button Text</Button>
+        <Button disabled style='secondary' size='xl' >Button Text</Button>
+      </div>
       <div className="mt-2">
         <Button style='secondary' shape='rounded' size='xs' >Button Text</Button>
         <Button style='secondary' shape='rounded' size='sm' >Button Text</Button>
         <Button style='secondary' shape='rounded' size='md' >Button Text</Button>
         <Button style='secondary' shape='rounded' size='lg' >Button Text</Button>
         <Button style='secondary' shape='rounded' size='xl' >Button Text</Button>
+      </div> 
+      disabled
+      <div className="mt-2">
+        <Button disabled style='secondary' shape='rounded' size='xs' >Button Text</Button>
+        <Button disabled style='secondary' shape='rounded' size='sm' >Button Text</Button>
+        <Button disabled style='secondary' shape='rounded' size='md' >Button Text</Button>
+        <Button disabled style='secondary' shape='rounded' size='lg' >Button Text</Button>
+        <Button disabled style='secondary' shape='rounded' size='xl' >Button Text</Button>
       </div> 
     </div>
   )
@@ -760,6 +792,9 @@ export default function App() {
 
   return (
     <div>
+      <ButtonDemo />
+
+
       <h1>Task List</h1>
 
       {/* { displayOrderString &&  */}
@@ -781,22 +816,17 @@ export default function App() {
           />
         }
       </div>
-      <button
-        onClick={handleAddTask}
-      >
-        Create Task
-      </button>
-      <button
-        onClick={handleClickPrioritize}
-      >
-        PRIORITIZE
-      </button>
       <Button
         onClick={handleAddTask}
         >
-        Create Task
+        Add Task
       </Button>
-      <ButtonDemo />
+      <Button
+        onClick={handleClickPrioritize}
+        disabled
+      >
+        PRIORITIZE
+      </Button>
     </div>
   )
 }
