@@ -404,12 +404,13 @@ const Task = (props) => {
   }
 
   const taskClasses = `
-    px-3 py-1 my-2 
+    px-3 my-2 
     rounded-xl
     hover:bg-amber-50
-    hover:ring-1 hover:shadow-sm
+    hover:ring-1 
+    ${!editing && 'hover:shadow-sm'}
     ring-inset ring-amber-100/25
-    ${editing && "shadow-md hover:shadow-md bg-amber-50 ring-1 ring-amber-100/50"}
+    ${editing && "shadow-md bg-amber-50 ring-1 ring-amber-100/50"}
   `;
 
   const centerAreaClasses = `
@@ -485,18 +486,19 @@ const Task = (props) => {
 
   const uneditableCenterArea = (
     <div
+      className='text-left leading-tight'
     >
       <label 
         htmlFor="comments" 
         className={classNames(
-          `text-lg leading-none`,
-          task.text ? 'font-medium text-gray-900' : 'font-normal text-gray-500'
+          ``,
+          task.text ? 'font-medium text-gray-900' : 'font-normal italic text-gray-400'
         )}
       >
         {task.text || "New Task"}
       </label>
       { task.idTag > 0 && 
-        <p id="comments-description" className="text-left mt-0.5 text-gray-500 tracking leading-none">
+        <p id="comments-description" className="mt-0.5 text-gray-500 tracking">
           {props.tableStore.getCell('tag',task.idTag,'text')}
         </p>
       }
@@ -516,7 +518,7 @@ const Task = (props) => {
           id="text"
           className="
             block w-full rounded-md border-0 py-1 
-            text-gray-800 font-medium text-lg
+            text-gray-800 font-medium 
             placeholder:text-gray-400
             shadow-sm ring-1 ring-inset ring-gray-300  
             focus:ring-2 focus:ring-inset focus:ring-amber-600"
@@ -587,7 +589,7 @@ const Task = (props) => {
           }
         </div>
         <button className='
-            ml-1 py-1 px-2
+            py-2 px-2
             leading-6 w-full 
             active:bg-amber-100 
             rounded-md 
