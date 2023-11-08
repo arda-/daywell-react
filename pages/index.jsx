@@ -238,7 +238,9 @@ const ToggleButton = (props) => {
     rounded-md
     ${props.selected ? `text-amber-700` : `text-neutral-300`}
     hover:bg-amber-100 hover:shadow-sm
+    hover:ring-1 ring-inset ring-amber-200/25
     active:bg-amber-200 active:text-amber-700
+    focus-visible:ring-2 focus-visible:bg-amber-50 focus-visible:outline-none focus-visible:ring-amber-600
     py-1 px-2 
     text-2xl font-black 
     leading-none 
