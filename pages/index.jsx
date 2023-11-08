@@ -134,8 +134,8 @@ export function TagDropdown(props) {
   }
 
   function handleClickMenu(event) {
+    // stop propagation so that the task body doesn't try to close itself.
     event.stopPropagation();
-    // console.log("emitting onClick");
     props.onClick(event);
   }
 
@@ -152,14 +152,14 @@ export function TagDropdown(props) {
         <Menu.Button className="
           inline-flex w-full justify-center 
           gap-x-1.5 rounded-md bg-white 
-          px-2 py-1 
+          px-2.5 py-1 
           text-gray-700 
           ring-1 ring-inset ring-gray-300 
           hover:ring-amber-600 hover:rig-2
         " 
         >
           {activeTagText}
-          <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+          <ChevronDownIcon className="-mr-1.5 mt-1 h-5 w-5 text-gray-400" aria-hidden="true" />
         </Menu.Button>
       </div>
 
@@ -250,7 +250,9 @@ const Task = (props) => {
   }
 
   const taskClasses = `
-    px-3 py-1.5 my-2 hover:bg-amber-50
+    px-3 py-1 my-2 
+    rounded-lg
+    hover:bg-amber-50
     ${editing && "shadow-md bg-amber-50"}
   `;
 
@@ -259,7 +261,9 @@ const Task = (props) => {
   `;
 
 
+  
   const handleToggleImportant = () => {
+    event.stopPropagation();
     // if it's odd, then it has an important bit already set
     if (priorityIsImportant(task.priority)) {
       // clear out the bottom bit by SUBTRACTING ONE
@@ -271,7 +275,8 @@ const Task = (props) => {
     }
   }
 
-  const handleToggleUrgent = () => {
+  const handleToggleUrgent = (event) => {
+    event.stopPropagation();
     // if the second bit is on, it's important
     if (priorityIsUrgent(task.priority)) {
       // so clear out that second bit by SUBTRACTING TWO
@@ -285,6 +290,7 @@ const Task = (props) => {
 
 
   const handleDeleteTask = () => {
+    event.stopPropagation();
     // to be deleted, task was active. remove it from active task status.
     props.appStateStore.setValue('activeTask', 0);
     props.tableStore.delRow('task', props.id);
@@ -318,25 +324,20 @@ const Task = (props) => {
     event.stopPropagation();
   }
 
-  function handleClickTagMenu(event) {
-    // console.log("clicked tag menu, blockign propagation");
-    // event.stopPropagation();
-  }
-
   const uneditableCenterArea = (
     <div
     >
       <label 
         htmlFor="comments" 
         className={classNames(
-          `text-lg`,
+          `text-lg leading-none`,
           task.text ? 'font-medium text-gray-900' : 'font-normal text-gray-500'
         )}
       >
         {task.text || "New Task"}
       </label>
       { task.idTag > 0 && 
-        <p id="comments-description" className="font-normal text-gray-500 tracking leading-none">
+        <p id="comments-description" className="mt-0.5 text-gray-500 tracking leading-none">
           {props.tableStore.getCell('tag',task.idTag,'text')}
         </p>
       }
@@ -356,7 +357,7 @@ const Task = (props) => {
           id="text"
           className="
             block w-full rounded-md border-0 py-1 
-            text-gray-900 font-medium text-lg
+            text-gray-800 font-medium text-lg
             placeholder:text-gray-400
             shadow-sm ring-1 ring-inset ring-gray-300  
             focus:ring-2 focus:ring-inset focus:ring-amber-600"
@@ -370,6 +371,7 @@ const Task = (props) => {
       
       <div
         ref={taskTagMenuRef}
+        className="mt-1"
       >
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <TagDropdown
@@ -427,7 +429,7 @@ const Task = (props) => {
         <div className='
             ml-1 py-1 px-2
             leading-6 w-full 
-            hover:bg-amber-100 active:bg-amber-200 
+            active:bg-amber-100 
             rounded-md 
             cursor-pointer
             flex flex-col items-start'
