@@ -90,7 +90,7 @@ const Button = (props) => {
       break;
     case "secondary":
     default:
-      bgColor = 'bg-white hover:bg-gray-100 active:bg-gray-200'
+      bgColor = 'bg-white hover:bg-gray-100 active:bg-gray-200 disabled:bg-gray-200'
       textColor = 'text-gray-900'
       ring = 'ring-1 ring-inset ring-gray-300'
       break;
@@ -792,7 +792,7 @@ export default function App() {
 
   return (
     <div>
-      <ButtonDemo />
+      {/* <ButtonDemo /> */}
 
 
       <h1>Task List</h1>
@@ -822,8 +822,8 @@ export default function App() {
         Add Task
       </Button>
       <Button
-        onClick={handleClickPrioritize}
         disabled
+        onClick={handleClickPrioritize}
       >
         PRIORITIZE
       </Button>
