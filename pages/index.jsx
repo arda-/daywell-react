@@ -240,7 +240,7 @@ const ToggleButton = (props) => {
     hover:bg-amber-100 hover:shadow-sm
     hover:ring-1 ring-inset ring-amber-200/25
     active:bg-amber-200 active:text-amber-700
-    focus-visible:ring-2 focus-visible:bg-amber-50 focus-visible:outline-none focus-visible:ring-amber-600
+    focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-amber-600
     py-1 px-2 
     text-2xl font-black 
     leading-none 
@@ -321,7 +321,8 @@ export function TagDropdown(props) {
           px-2.5 py-1 
           text-gray-700 
           ring-1 ring-inset ring-gray-300 
-          hover:ring-amber-600 hover:rig-2
+          hover:ring-amber-600
+          focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:outline-none
         " 
         >
           {activeTagText}
@@ -495,7 +496,7 @@ const Task = (props) => {
         {task.text || "New Task"}
       </label>
       { task.idTag > 0 && 
-        <p id="comments-description" className="mt-0.5 text-gray-500 tracking leading-none">
+        <p id="comments-description" className="text-left mt-0.5 text-gray-500 tracking leading-none">
           {props.tableStore.getCell('tag',task.idTag,'text')}
         </p>
       }
@@ -585,17 +586,17 @@ const Task = (props) => {
             </button>
           }
         </div>
-        <div className='
+        <button className='
             ml-1 py-1 px-2
             leading-6 w-full 
             active:bg-amber-100 
             rounded-md 
-            cursor-pointer
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600
             flex flex-col items-start'
           onClick={handleClickTaskBody}
         >
           {editing ? editableCenterArea : uneditableCenterArea}
-        </div>
+        </button>
         <div className="flex items-center h-100">
           <ToggleButton 
             className='w-8 h-8' 
