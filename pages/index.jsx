@@ -574,7 +574,7 @@ const Task = (props) => {
           onChange={handleChangeText}
           onClick={handleClickTextBox}
           onKeyPress={handleTextboxKeypress}
-          autoFocus
+          autoFocus={task.text === ""}
         />
       </div>
       
