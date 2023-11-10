@@ -70,7 +70,7 @@ function useDebounce(value, delay) {
 
 
 const Button = (props) => {
-  const { shape, disabled, size, style,  } = props;
+  const { shape, disabled, size, style, className } = props;
 
   let rounding = ''
   let textWeight = 'font-semibold'
@@ -148,6 +148,7 @@ const Button = (props) => {
           textWeight, textSize, textColor, 
           bgColor, ring, shadow, hover, outline,
           cursor,
+          className
         )} 
         type="button"
         onClick={handleOnClick}
@@ -897,18 +898,19 @@ export default function App() {
     <div>
       {/* <ButtonDemo /> */}
 
+      <h1 
+        className="text-2xl font-bold mx-2 mt-3"
+      >
+        Tasks
+      </h1>
 
-      <h1>Task List</h1>
-
-      {/* { displayOrderString &&  */}
-        <>
+        {/* <>
           <div className="font-bold italic">displayOrderString:</div>
           {displayOrderString}
-        </>
-      {/* } */}
+        </> */}
 
-      <div className="font-bold italic">values:</div>
-      {JSON.stringify(values)}
+      {/* <div className="font-bold italic">values:</div>
+      {JSON.stringify(values)} */}
 
       <div>
         {displayOrderString && 
@@ -919,17 +921,28 @@ export default function App() {
           />
         }
       </div>
-      <Button
-        onClick={handleAddTask}
-        >
-        Add Task
-      </Button>
-      <Button
-        onClick={handleClickPrioritize}
-        // disabled
+      <menu
+        className="flex py-2 justify-center"
       >
-        PRIORITIZE
-      </Button>
+        <Button
+          onClick={handleClickPrioritize}
+          className="mr-1"
+        >
+          Group
+        </Button>
+        <Button
+          onClick={handleClickPrioritize}
+          className="mx-1"
+        >
+          PRIORITIZE
+        </Button>
+        <Button
+          className="ml-1"
+          onClick={handleAddTask}
+          >
+          Add Task
+        </Button>
+      </menu>
     </div>
   )
 }
