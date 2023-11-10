@@ -545,7 +545,9 @@ const Task = (props) => {
       >
         {task.text || "New Task"}
       </label>
-      { task.idTag > 0 && 
+
+      { (task.idTag > 0) && 
+        (!props.appStateStore.getValue('groupByTag')) &&
         <p id="comments-description" className="mt-0.5 text-gray-500 tracking">
           {props.tableStore.getCell('tag',task.idTag,'text')}
         </p>
@@ -773,6 +775,7 @@ export default function App() {
         activeTask: -1, 
         hoveredTask: -1,
         taskIdOrder: '',
+        groupByTag: false,
     });
     return store;
   }, [])
@@ -870,6 +873,24 @@ export default function App() {
     }
   }
 
+  function handleClickGroup() { 
+    // ask for the new propritized order from the table store
+    if (appStateStore.getValue('groupByTag') === true) {
+      appStateStore.setValue('groupByTag', false);
+      // TODO: recalculate the display order to be.. prioritized? whatever it was before..
+    } else {
+      appStateStore.setValue('groupByTag', true)
+      // TODO: recalculate the display order value to be GROUPED
+    }
+
+
+    // const newOrder = calcNewOrder();
+    // if (shouldUpdateDisplayOrder(newOrder)) {
+    //   // update the app state variable with this new order
+    //   appStateStore.setValue('taskIdOrder', JSON.stringify(newOrder))
+    // }
+  }
+
 
   const handleAddTask = () => {
     const newRowId = tableStore.addRow(
@@ -925,7 +946,7 @@ export default function App() {
         className="flex py-2 justify-center"
       >
         <Button
-          onClick={handleClickPrioritize}
+          onClick={handleClickGroup}
           className="mr-1"
         >
           Group
