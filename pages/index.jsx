@@ -1031,10 +1031,17 @@ export default function App() {
 
 
       <div>
-        {displayOrderString && 
-          <GroupedTaskList 
-            // taskIds={JSON.parse(displayOrderString)}
-            taskIds={calcGroupedOrder()}
+        { !appStateStore.getValue('groupByTag') &&
+          displayOrderString && 
+          <TaskList 
+            taskIds={JSON.parse(displayOrderString)}
+            tableStore={tableStore}
+            appStateStore={appStateStore}
+          />
+        }
+        {
+          appStateStore.getValue('groupByTag') && 
+          <GroupedTaskList
             tableStore={tableStore}
             appStateStore={appStateStore}
           />
