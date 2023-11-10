@@ -678,6 +678,7 @@ const Task = (props) => {
 
 const TaskList = (props) => {
   const { taskIds, tableStore, appStateStore } = props;
+
   return (
     <>
       {taskIds.map((id) => (
@@ -691,6 +692,77 @@ const TaskList = (props) => {
     </>
   );
 }
+
+
+const GroupedTaskList = props => {
+  const { taskIds, tableStore, appStateStore } = props;
+
+  // TODO: change this to be REACTIVE using USE or somethign idfk
+  const tagsAlpha = tableStore.getSortedRowIds('tag', 'text');
+
+  const tagsAlphaReordered = useMemo(() => {
+    let copy = tagsAlpha.map(Number)
+    const index = copy.indexOf(0);
+
+    if (index !== -1 && index !== 0) {
+      copy.splice(index, 1);
+      copy.unshift(0);
+    }
+
+    return copy;
+  }, [tagsAlpha]) 
+
+  const tasks = useTable('task', tableStore);
+  
+  const queries = createQueries(tableStore);
+  
+  
+  const test = tagsAlphaReordered.map((idTag) => {
+    const idQuery = `getTasksForTag${idTag}`;
+    queries.setQueryDefinition(
+      idQuery, 
+      'task', 
+      ({select, where}) => {
+        select('idTag')
+        where('idTag', idTag);
+      }
+    );
+
+    const resultRowIds = queries.getResultRowIds(idQuery);
+
+    queries.delQueryDefinition(idQuery)
+
+    return {
+      tagName: tableStore.getCell('tag', idTag, 'text'),
+      taskIds: resultRowIds,
+    }
+  })
+  
+  console.log("test", test)
+  
+  return (
+    <>
+      {test.map((x) => (
+        <>
+          <h2>{x.tagName}</h2>
+          {x.taskIds.length && x.taskIds.map((id) => (
+            <Task 
+              key={id}
+              id={id}
+              tableStore={tableStore}
+              appStateStore={appStateStore}
+            />
+          ))}
+          { !x.taskIds.length &&
+            <p>no tasks</p>
+          }
+        </>
+        )
+      )}
+    </>
+  );
+}
+
 
 
 export default function App() {
@@ -766,7 +838,7 @@ export default function App() {
 
 
 
-  // const test = useLocalRowIds('task_tag', '0', relationships);
+  // const test = useLocalRowIds('`task_tag`', '0', relationships);
 
   let appStateStore = useRef(null);
   appStateStore = useMemo(() => {
@@ -787,6 +859,22 @@ export default function App() {
   }
 
   const displayOrderString = useValue('taskIdOrder', appStateStore);
+
+
+  // THINGS TO CALCULATE THE GROUPED VIEW
+
+  let indexes = useCreateIndexes(tableStore, () => {
+    return createIndexes(tableStore).setIndexDefinition(
+      'tagText',
+      'tag',
+      'text',
+    );
+  });
+
+  let tags = useSliceIds('tagText', indexes);
+  // we can assume that this tags array is actually ordered by ID, which is awesome. 
+
+  const calcGroupedOrder = () => tableStore.getSortedRowIds('task', 'idTag', false);
 
 
   
@@ -864,6 +952,8 @@ export default function App() {
   
   const calcNewOrder = () => tableStore.getSortedRowIds('task', 'priority', true);
 
+
+
   const handleClickPrioritize = () => { 
     // ask for the new propritized order from the table store
     const newOrder = calcNewOrder();
@@ -930,13 +1020,21 @@ export default function App() {
           {displayOrderString}
         </> */}
 
-      {/* <div className="font-bold italic">values:</div>
-      {JSON.stringify(values)} */}
+      <div className="font-bold italic">values:</div>
+      {JSON.stringify(values)}
+
+      <div className="font-bold italic">tags:</div>
+      {JSON.stringify(tags)}
+
+      <div className="font-bold italic">calcGroupedOrder:</div>
+      {JSON.stringify(calcGroupedOrder().map((x) => tags[x]))}
+
 
       <div>
         {displayOrderString && 
-          <TaskList 
-            taskIds={JSON.parse(displayOrderString)}
+          <GroupedTaskList 
+            // taskIds={JSON.parse(displayOrderString)}
+            taskIds={calcGroupedOrder()}
             tableStore={tableStore}
             appStateStore={appStateStore}
           />
