@@ -813,6 +813,12 @@ export default function App() {
       event.preventDefault()
     };
 
+    // OTHER SHORTCUTS
+    if (event.metaKey && event.key === 'p') {
+      handleClickPrioritize(); // TODO: should i not reuse this click handler?
+    }
+
+    // SHORTCUTS FOR TASKS
     const idActiveTask = appStateStore.getValue('activeTask');
     const idHoveredTask = appStateStore.getValue('hoveredTask');
 
