@@ -45,8 +45,8 @@ dependencies:
     specifier: link:@heroicons/react/20/solid
     version: link:@heroicons/react/20/solid
   tinybase:
-    specifier: 4.3.21
-    version: 4.3.21(react-dom@18.2.0)(react@18.2.0)
+    specifier: 4.4.0
+    version: 4.4.0(react-dom@18.2.0)(react@18.2.0)
   typescript:
     specifier: 4.9.5
     version: 4.9.5
@@ -2435,15 +2435,15 @@ packages:
     dependencies:
       any-promise: 1.3.0
 
-  /tinybase@4.3.21(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-k5jb5I7/2glG8W13TbU/3YMRM4LR+1FsJixFaqRyfqQAn71usC6iF0G5+DO2UnZd16Scg2qx5doO8h6P0zuYTA==}
+  /tinybase@4.4.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-5I9yoHEspDSzqOrkbmPOuvYch5qMLoPjWXn8ZLLdhGE3JWi4uIIkLBkBLrBjq557Lc6UOwz7w7opw0Hg0ddehA==}
     hasBin: true
     peerDependencies:
-      '@sqlite.org/sqlite-wasm': ^3.43.2-build1
+      '@sqlite.org/sqlite-wasm': ^3.44.0-build1
       '@vlcn.io/crsqlite-wasm': ^0.15.2
       automerge-repo: ^0.1.0
-      partykit: ^0.0.32
-      partysocket: ^0.0.12
+      partykit: ^0.0.34
+      partysocket: ^0.0.14
       prettier: ^3.0.3
       react: ^18.2.0
       react-dom: ^18.2.0
