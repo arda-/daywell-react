@@ -1073,12 +1073,14 @@ export default function App() {
         <Button
           onClick={handleClickPrioritize}
           className="mx-1"
+          // style={"soft"}
         >
-          PRIORITIZE
+          Prioritize
         </Button>
         <Button
           className="ml-1"
           onClick={handleAddTask}
+          style={"primary"}
           >
           Add Task
         </Button>
