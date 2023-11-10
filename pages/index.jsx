@@ -301,6 +301,9 @@ function deleteTask(idTask, tableStore, appStateStore) {
     appStateStore.setValue('activeTask', 0);
     tableStore.delRow('task', idTask);
 
+    // ensure it's no longer the hovered task
+    appStateStore.setValue('hoveredTask', -1);
+
     // now we have to update the UI to also not show this item anymore
     const orderString = appStateStore.getValue('taskIdOrder');
     const orderIds = JSON.parse(orderString);
@@ -527,17 +530,6 @@ const Task = (props) => {
     props.appStateStore.setValue('hoveredTask', -1);
   }
 
-
-  function handleFocus(event) {
-    console.log("focused", props.id);
-  }
-
-  function handleBlur(event) {
-    console.log("blur", props.id);
-  }
-
-
-
   const uneditableCenterArea = (
     <div
       className='text-left leading-tight'
@@ -607,8 +599,6 @@ const Task = (props) => {
   return (
     <div 
       className={taskClasses}
-      onFocusCapture={handleFocus}
-      onBlur={handleBlur}  
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -1043,10 +1033,11 @@ export default function App() {
           <div className="font-bold italic">displayOrderString:</div>
           {displayOrderString}
         </> */}
-{/* 
+
       <div className="font-bold italic">values:</div>
       {JSON.stringify(values)}
 
+{/* 
       <div className="font-bold italic">tags:</div>
       {JSON.stringify(tags)}
 
