@@ -296,6 +296,22 @@ function toggleImportant(idTask, currentPriority, tableStore) {
   console.log("important after", a);
 }
 
+function deleteTask(idTask, tableStore, appStateStore) {
+    // to be deleted, task was active. remove it from active task status.
+    appStateStore.setValue('activeTask', 0);
+    tableStore.delRow('task', idTask);
+
+    // now we have to update the UI to also not show this item anymore
+    const orderString = appStateStore.getValue('taskIdOrder');
+    const orderIds = JSON.parse(orderString);
+    const indexToRemove = orderIds.indexOf(idTask);
+    orderIds.splice(indexToRemove, 1);
+    const newOrderString = JSON.stringify(orderIds);
+    appStateStore.setValue('taskIdOrder', newOrderString);
+
+    // TODO: show UNDO toast
+}
+
 
 
 // TODO: one day, seperate this into a generic Dropdown component
@@ -466,21 +482,11 @@ const Task = (props) => {
     toggleUrgent(props.id, task.priority, props.tableStore)
   }
 
-  const handleDeleteTask = () => {
+
+
+  const handleClickTrash = (event) => {
     event.stopPropagation();
-    // to be deleted, task was active. remove it from active task status.
-    props.appStateStore.setValue('activeTask', 0);
-    props.tableStore.delRow('task', props.id);
-
-    // now we have to update the UI to also not show this item anymore
-    const orderString = props.appStateStore.getValue('taskIdOrder');
-    const orderIds = JSON.parse(orderString);
-    const indexToRemove = orderIds.indexOf(props.id);
-    orderIds.splice(indexToRemove, 1);
-    const newOrderString = JSON.stringify(orderIds);
-    props.appStateStore.setValue('taskIdOrder', newOrderString);
-
-    // TODO: show UNDO toast
+    deleteTask(props.id, props.tableStore, props.appStateStore);
   }
 
 
@@ -638,7 +644,7 @@ const Task = (props) => {
                 rounded-full 
                 text-gray-400 hover:text-gray-500
               "
-              onClick={() => handleDeleteTask()}
+              onClick={handleClickTrash}
               >
               <TrashIcon className="h-5 w-5" aria-hidden="true" />
               <span className="sr-only">Delete</span>
@@ -938,6 +944,10 @@ export default function App() {
         
       if (event.metaKey && event.key === 'i') {
         toggleImportant(targetTaskId, targetTaskPriority, tableStore)
+      }
+
+      if (event.metaKey && event.key === 'Backspace') {
+        deleteTask(targetTaskId, tableStore, appStateStore);
       }
     }
   };
