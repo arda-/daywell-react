@@ -737,15 +737,22 @@ const GroupedTaskList = props => {
       taskIds: resultRowIds,
     }
   })
-  
-  console.log("test", test)
+
   
   return (
-    <>
+    <div className="mt-6">
       {test.map((x) => (
         <>
-          <h2>{x.tagName}</h2>
-          {x.taskIds.length && x.taskIds.map((id) => (
+          { x.tagName !== "None" && 
+            <h2 
+              className="
+                font-semibold text-lg text-amber-900
+                mx-2 leading-none mt-6 first:mt-6"
+            >
+              {x.tagName}
+            </h2>
+          }
+          { !!x.taskIds.length && x.taskIds.map((id) => (
             <Task 
               key={id}
               id={id}
@@ -753,13 +760,20 @@ const GroupedTaskList = props => {
               appStateStore={appStateStore}
             />
           ))}
-          { !x.taskIds.length &&
-            <p>no tasks</p>
+          { !!!x.taskIds.length &&
+            <div className="mx-2">
+              <p className="
+                my-4 leading-none
+                ml-4
+                italic
+                text-gray-500
+              ">no tasks in this Tag</p>
+            </div>
           }
         </>
         )
       )}
-    </>
+    </div>
   );
 }
 
@@ -847,7 +861,7 @@ export default function App() {
         activeTask: -1, 
         hoveredTask: -1,
         taskIdOrder: '',
-        groupByTag: false,
+        groupByTag: true,
     });
     return store;
   }, [])
@@ -1019,7 +1033,7 @@ export default function App() {
           <div className="font-bold italic">displayOrderString:</div>
           {displayOrderString}
         </> */}
-
+{/* 
       <div className="font-bold italic">values:</div>
       {JSON.stringify(values)}
 
@@ -1027,7 +1041,7 @@ export default function App() {
       {JSON.stringify(tags)}
 
       <div className="font-bold italic">calcGroupedOrder:</div>
-      {JSON.stringify(calcGroupedOrder().map((x) => tags[x]))}
+      {JSON.stringify(calcGroupedOrder().map((x) => tags[x]))} */}
 
 
       <div>
@@ -1054,7 +1068,7 @@ export default function App() {
           onClick={handleClickGroup}
           className="mr-1"
         >
-          Group
+          Group by Tag
         </Button>
         <Button
           onClick={handleClickPrioritize}
