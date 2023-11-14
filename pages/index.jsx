@@ -46,6 +46,7 @@ import { BottomMenu } from "components/BottomMenu";
 import { Button } from "components/Button";
 import { TaskList, GroupedTaskList } from "components/TaskList";
 import { PageTitle } from "components/PageTitle";
+import Layout from "components/Layout";
 
 import {
   classNames,
@@ -300,28 +301,30 @@ export default function App() {
 
   return (
     <Provider storesById={{ appStateStore, tableStore }}>
-      <PageTitle title="Tasks" />
-      <div>
-        {!appStateStore.getValue("groupByTag") && displayOrderString && (
-          <TaskList taskIds={JSON.parse(displayOrderString)} />
-        )}
-        {appStateStore.getValue("groupByTag") && <GroupedTaskList />}
-      </div>
-      <BottomMenu tableStore={tableStore} appStateStore={appStateStore}>
-        <Button onClick={handleClickGroup} className="mr-1">
-          Group by Tag
-        </Button>
-        <Button
-          onClick={handleClickPrioritize}
-          className="mx-1"
-          // style={"soft"}
-        >
-          Prioritize
-        </Button>
-        <Button className="ml-1" onClick={handleAddTask} style={"primary"}>
-          Add Task
-        </Button>
-      </BottomMenu>
+      <Layout>
+        <PageTitle title="Tasks" />
+        <div>
+          {!appStateStore.getValue("groupByTag") && displayOrderString && (
+            <TaskList taskIds={JSON.parse(displayOrderString)} />
+          )}
+          {appStateStore.getValue("groupByTag") && <GroupedTaskList />}
+        </div>
+        <BottomMenu tableStore={tableStore} appStateStore={appStateStore}>
+          <Button onClick={handleClickGroup} className="mr-1">
+            Group by Tag
+          </Button>
+          <Button
+            onClick={handleClickPrioritize}
+            className="mx-1"
+            // style={"soft"}
+          >
+            Prioritize
+          </Button>
+          <Button className="ml-1" onClick={handleAddTask} style={"primary"}>
+            Add Task
+          </Button>
+        </BottomMenu>
+      </Layout>
     </Provider>
   );
 }
