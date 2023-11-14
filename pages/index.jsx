@@ -44,6 +44,7 @@ import {
 import { BottomMenu } from 'components/BottomMenu'
 import { Button } from 'components/Button'
 import { TaskList, GroupedTaskList } from 'components/TaskList'
+import { PageTitle } from 'components/PageTitle'
 
 import {
   classNames,
@@ -317,30 +318,7 @@ export default function App() {
   
   return (
     <div>
-      {/* <ButtonDemo /> */}
-
-      <h1 
-        className="text-2xl font-bold mx-2 mt-3"
-      >
-        Tasks
-      </h1>
-
-        {/* <>
-          <div className="font-bold italic">displayOrderString:</div>
-          {displayOrderString}
-        </> */}
-
-      <div className="font-bold italic">values:</div>
-      {JSON.stringify(values)}
-
-{/* 
-      <div className="font-bold italic">tags:</div>
-      {JSON.stringify(tags)}
-
-      <div className="font-bold italic">calcGroupedOrder:</div>
-      {JSON.stringify(calcGroupedOrder().map((x) => tags[x]))} */}
-
-
+      <PageTitle title="Tasks" />
       <div>
         { !appStateStore.getValue('groupByTag') &&
           displayOrderString && 
