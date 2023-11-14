@@ -25,9 +25,9 @@ const Button = (props) => {
     case "secondary":
     default:
       bgColor =
-        "bg-white hover:bg-gray-100 active:bg-gray-200 disabled:bg-gray-200";
-      textColor = "text-gray-900";
-      ring = "ring-1 ring-inset ring-gray-300";
+        "bg-white hover:bg-neutral-100 active:bg-neutral-200 disabled:bg-neutral-200";
+      textColor = "text-neutral-900";
+      ring = "ring-1 ring-inset ring-neutral-300";
       break;
     case "soft":
       break;
