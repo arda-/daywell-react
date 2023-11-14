@@ -1,8 +1,9 @@
+import Nav from "/components/Nav";
+
 function Layout({ children }) {
   return (
     <div>
-      {/* <Nav /> */}
-      test
+      <Nav />
       {children}
     </div>
   );
