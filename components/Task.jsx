@@ -16,9 +16,13 @@ import { TagDropdown } from "components/TagDropdown";
 
 const ToggleButton = (props) => {
   const styleClasses = `
-    rounded-md
-    ${props.selected ? `text-amber-700` : `text-neutral-300`}
-    hover:bg-amber-100 hover:shadow-sm
+    rounded-lg
+    ${
+      props.selected
+        ? `text-amber-700`
+        : `text-neutral-400/50 hover:text-neutral-400/80`
+    }
+    hover:bg-amber-300/50 hover:shadow-sm 
     hover:ring-1 ring-inset ring-amber-200/25
     active:bg-amber-200 active:text-amber-700
     focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-amber-600
@@ -59,8 +63,8 @@ export const Task = (props) => {
   };
 
   const taskClasses = `
-  px-3 my-2 
-  rounded-xl
+  pl-3 pr-1 my-2 
+  ${!editing ? "rounded-lg" : "rounded-xl"}
   hover:bg-amber-100/50
   hover:ring-1 
   ${!editing && "hover:shadow-sm"}
