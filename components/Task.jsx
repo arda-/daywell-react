@@ -61,7 +61,7 @@ export const Task = (props) => {
   const taskClasses = `
   px-3 my-2 
   rounded-xl
-  hover:bg-amber-50
+  hover:bg-amber-100/50
   hover:ring-1 
   ${!editing && "hover:shadow-sm"}
   ring-inset ring-amber-100/25
