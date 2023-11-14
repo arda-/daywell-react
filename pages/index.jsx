@@ -38,7 +38,8 @@ import {
   useRowIds, 
   useLocalRowIds,
   useCreateIndexes,
-  useCell
+  useCell,
+  Provider
 } from 'tinybase/ui-react';
 
 import { BottomMenu } from 'components/BottomMenu'
@@ -317,7 +318,7 @@ export default function App() {
   
   
   return (
-    <div>
+    <Provider storesById={{ appStateStore, tableStore }}>
       <PageTitle title="Tasks" />
       <div>
         { !appStateStore.getValue('groupByTag') &&
@@ -330,10 +331,7 @@ export default function App() {
         }
         {
           appStateStore.getValue('groupByTag') && 
-          <GroupedTaskList
-            tableStore={tableStore}
-            appStateStore={appStateStore}
-          />
+          <GroupedTaskList />
         }
       </div>
       <BottomMenu 
@@ -361,6 +359,6 @@ export default function App() {
           Add Task
         </Button> 
       </BottomMenu>
-    </div>
+    </Provider>
   )
 }

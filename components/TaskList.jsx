@@ -7,6 +7,7 @@ import {
 } from 'tinybase';
 import { 
   useTable, 
+  useStore,
 } from 'tinybase/ui-react';
 
 import { Task } from '/components/Task'
@@ -30,7 +31,8 @@ export function TaskList(props) {
   
   
 export function GroupedTaskList(props) {
-  const { taskIds, tableStore, appStateStore } = props;
+  const appStateStore = useStore('appStateStore');
+  const tableStore = useStore('tableStore');
 
   // TODO: change this to be REACTIVE using USE or somethign idfk
   const tagsAlpha = tableStore.getSortedRowIds('tag', 'text');
