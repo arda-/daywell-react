@@ -14,7 +14,8 @@ import {
 import { 
   useSliceIds,
   useCreateIndexes,
-  useCell
+  useCell,
+  useStore,
 } from 'tinybase/ui-react';
 
 import {
@@ -25,9 +26,9 @@ import {
 // and wrap it in it's provided data
 export function TagDropdown(props) {
   
-  const { tableStore, idActiveTag } = props;
+  const { idActiveTag } = props;
   
-  
+  const tableStore = useStore('tableStore');
   
   let indexes = useCreateIndexes(tableStore, () => {
     return createIndexes(tableStore).setIndexDefinition(

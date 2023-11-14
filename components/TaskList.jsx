@@ -15,10 +15,6 @@ import { Task } from '/components/Task'
 export function TaskList(props) {
   const { taskIds } = props;
 
-  const appStateStore = useStore('appStateStore');
-  const tableStore = useStore('tableStore');
-
-
   return (
     <>
       {taskIds.map((id) => (
