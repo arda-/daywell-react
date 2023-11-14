@@ -603,7 +603,7 @@ const Task = (props) => {
       onMouseLeave={handleMouseLeave}
     >
       <div className="relative flex">
-        <div className='flex flex-col justify-center w-6'>
+        <div className='flex flex-col justify-center'>
           <div className="flex flex-col justify-center">
             <input
               id="done"
@@ -611,7 +611,7 @@ const Task = (props) => {
               name="done"
               type="checkbox"
               className="
-                h-4 w-4 
+                h-4 w-4 mr-0.5
                 rounded border-2
                 border-gray-300 hover:border-amber-600
                 cursor-pointer
@@ -645,7 +645,7 @@ const Task = (props) => {
             py-2 px-2
             leading-6 w-full 
             active:bg-amber-100 
-            rounded-md 
+            rounded-lg
             focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600
             flex flex-col items-start'
           onClick={handleClickTaskBody}
