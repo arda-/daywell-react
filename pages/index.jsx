@@ -43,9 +43,9 @@ import {
 } from "tinybase/ui-react";
 
 import { BottomMenu } from "components/BottomMenu";
-import { Button } from "components/Button";
+import Button from "components/Button";
 import { TaskList, GroupedTaskList } from "components/TaskList";
-import { PageTitle } from "components/PageTitle";
+import PageTitle from "components/PageTitle";
 import Layout from "components/Layout";
 
 import {
