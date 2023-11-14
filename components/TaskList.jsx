@@ -13,7 +13,11 @@ import {
 import { Task } from '/components/Task'
 
 export function TaskList(props) {
-  const { taskIds, tableStore, appStateStore } = props;
+  const { taskIds } = props;
+
+  const appStateStore = useStore('appStateStore');
+  const tableStore = useStore('tableStore');
+
 
   return (
     <>
@@ -21,8 +25,6 @@ export function TaskList(props) {
         <Task 
           key={id}
           id={id}
-          tableStore={tableStore}
-          appStateStore={appStateStore}
         />
       ))}
     </>

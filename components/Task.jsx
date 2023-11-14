@@ -11,6 +11,7 @@ import {
 import { 
   useRow, 
   useValue, 
+  useStore,
 } from 'tinybase/ui-react';
 
 
@@ -57,9 +58,12 @@ const ToggleButton = (props) => {
 
 
 export const Task = (props) => {
+
+  const appStateStore = useStore('appStateStore');
+  const tableStore = useStore('tableStore');
   
-  let task = useRow('task', props.id, props.tableStore);
-  const idActiveTask = useValue('activeTask', props.appStateStore)
+  let task = useRow('task', props.id, tableStore);
+  const idActiveTask = useValue('activeTask', appStateStore)
   
   const editing = useMemo(() => {
     return props.id === idActiveTask
@@ -71,9 +75,9 @@ export const Task = (props) => {
   
   const handleClickTaskBody = (event) => {
     if (!editing) {
-      props.appStateStore.setValue('activeTask', props.id);
+      appStateStore.setValue('activeTask', props.id);
     } else {
-      props.appStateStore.setValue('activeTask', -1);
+      appStateStore.setValue('activeTask', -1);
     }
   }
   
@@ -101,32 +105,32 @@ export const Task = (props) => {
   
   const handleToggleImportant = (event) => {
     event.stopPropagation();
-    toggleImportant(props.id, task.priority, props.tableStore)
+    toggleImportant(props.id, task.priority, tableStore)
   }
   
   const handleToggleUrgent = (event) => {
     event.stopPropagation();
-    toggleUrgent(props.id, task.priority, props.tableStore)
+    toggleUrgent(props.id, task.priority, tableStore)
   }
   
   
   
   const handleClickTrash = (event) => {
     event.stopPropagation();
-    deleteTask(props.id, props.tableStore, props.appStateStore);
+    deleteTask(props.id, tableStore, appStateStore);
   }
   
   
   const handleChangeTag = (idSelectedTag) => {
     // console.log("handleChangeTag", idSelectedTag)
-    // console.log("value before changing", props.tableStore.getCell('task', props.id, 'idTag'))
-    props.tableStore.setCell('task', props.id, 'idTag', idSelectedTag);
-    // console.log("value after changing", props.tableStore.getCell('task', props.id, 'idTag'))
+    // console.log("value before changing", tableStore.getCell('task', props.id, 'idTag'))
+    tableStore.setCell('task', props.id, 'idTag', idSelectedTag);
+    // console.log("value after changing", tableStore.getCell('task', props.id, 'idTag'))
   }
   
   const handleChangeText = (e) => {
     const newText = e.target.value
-    props.tableStore.setCell('task', props.id, 'text', newText);
+    tableStore.setCell('task', props.id, 'text', newText);
   }
   
   const handleClickTextBox = (event) => {
@@ -136,7 +140,7 @@ export const Task = (props) => {
   
   function handleTextboxKeypress(e) {
     if (e.key === 'Enter') {
-      props.appStateStore.setValue('activeTask', -1);
+      appStateStore.setValue('activeTask', -1);
     }
   }
   
@@ -146,17 +150,17 @@ export const Task = (props) => {
   
   function handleMouseEnter() {
     setMouseIn(true)
-    props.appStateStore.setValue('hoveredTask', props.id);
+    appStateStore.setValue('hoveredTask', props.id);
   }
   
   function handleMouseLeave() {
     setMouseIn(false)
-    props.appStateStore.setValue('hoveredTask', -1);
+    appStateStore.setValue('hoveredTask', -1);
   }
   
   const uneditableCenterArea = (
     <div
-    className='text-left leading-tight'
+      className='text-left leading-tight'
     >
     <label 
     htmlFor="comments" 
@@ -169,9 +173,9 @@ export const Task = (props) => {
       </label>
       
       { (task.idTag > 0) && 
-        (!props.appStateStore.getValue('groupByTag')) &&
+        (!appStateStore.getValue('groupByTag')) &&
         <p id="comments-description" className="mt-0.5 text-gray-500 tracking">
-        {props.tableStore.getCell('tag',task.idTag,'text')}
+        {tableStore.getCell('tag',task.idTag,'text')}
         </p>
       }
       </div>
@@ -210,7 +214,7 @@ export const Task = (props) => {
         <span className='text-gray-700 font-medium text-sm mr-1'>TAG:</span>
         <TagDropdown
           idActiveTag={task.idTag}
-          tableStore={props.tableStore}
+          tableStore={tableStore}
           onChange={handleChangeTag} 
           onClick={() => {}}
         />
@@ -243,7 +247,7 @@ export const Task = (props) => {
           "
           defaultChecked={task.done}
           onClick={handleClickCheckbox}
-          onChange={() => props.tableStore.setCell('task', props.id, 'done', !task.done)} 
+          onChange={() => tableStore.setCell('task', props.id, 'done', !task.done)} 
           />
           </div>
           {editing && 

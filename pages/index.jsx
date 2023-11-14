@@ -325,8 +325,6 @@ export default function App() {
           displayOrderString && 
           <TaskList 
             taskIds={JSON.parse(displayOrderString)}
-            tableStore={tableStore}
-            appStateStore={appStateStore}
           />
         }
         {
