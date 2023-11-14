@@ -626,9 +626,9 @@ const Task = (props) => {
             <button
               type="button"
               className="
-                -mg-
+                -mx-1
                 flex 
-                w-6 h-6
+                w-6 h-6˚
                 mt-2
                 items-center justify-center 
                 rounded-full 
@@ -636,8 +636,8 @@ const Task = (props) => {
               "
               onClick={handleClickTrash}
               >
-              <TrashIcon className="h-5 w-5" aria-hidden="true" />
-              <span className="sr-only">Delete</span>
+                <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Delete</span>
             </button>
           }
         </div>
