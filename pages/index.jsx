@@ -41,6 +41,7 @@ import {
   useCell
 } from 'tinybase/ui-react';
 
+import { BottomMenu } from 'components/BottomMenu'
 import { Button } from 'components/Button'
 import { TaskList, GroupedTaskList } from 'components/TaskList'
 
@@ -256,7 +257,6 @@ export default function App() {
 
 
 
-
   const shouldUpdateDisplayOrder = (newDisplayOrder) => {
     const newDisplayOrderString = JSON.stringify(newDisplayOrder);
     return newDisplayOrderString !== calcDisplayOrderString();
@@ -265,8 +265,7 @@ export default function App() {
   const calcNewOrder = () => tableStore.getSortedRowIds('task', 'priority', true);
 
 
-
-  const handleClickPrioritize = () => { 
+  function handleClickPrioritize() { 
     // ask for the new propritized order from the table store
     const newOrder = calcNewOrder();
     if (shouldUpdateDisplayOrder(newOrder)) {
@@ -294,7 +293,7 @@ export default function App() {
   }
 
 
-  const handleAddTask = () => {
+  function handleAddTask() {
     const newRowId = tableStore.addRow(
       'task', 
       { 
@@ -315,8 +314,7 @@ export default function App() {
     // TODO: scroll to this item
   }
   
-
-
+  
   return (
     <div>
       {/* <ButtonDemo /> */}
@@ -360,10 +358,11 @@ export default function App() {
           />
         }
       </div>
-      <menu
-        className="flex py-2 justify-center"
+      <BottomMenu 
+        tableStore={tableStore}
+        appStateStore={appStateStore}
       >
-        <Button
+       <Button
           onClick={handleClickGroup}
           className="mr-1"
         >
@@ -380,10 +379,10 @@ export default function App() {
           className="ml-1"
           onClick={handleAddTask}
           style={"primary"}
-          >
+        >
           Add Task
-        </Button>
-      </menu>
+        </Button> 
+      </BottomMenu>
     </div>
   )
 }
