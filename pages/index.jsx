@@ -606,9 +606,9 @@ const Task = (props) => {
         <div className='flex flex-col justify-center w-6'>
           <div className="flex flex-col justify-center">
             <input
-              id="comments"
-              aria-describedby="comments-description"
-              name="comments"
+              id="done"
+              aria-describedby="done-description"
+              name="done"
               type="checkbox"
               className="
                 h-4 w-4 
