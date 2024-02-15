@@ -1,5 +1,10 @@
 import Image from "next/image";
 
+import { Client } from "appwrite";
+const client = new Client();
+
+client.setEndpoint("https://cloud.appwrite.io/v1").setProject("daywell");
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

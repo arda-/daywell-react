@@ -1,4 +1,4 @@
-import { classNames } from "lib/helpers";
+import { classNames } from "../lib/helpers";
 
 const Button = (props) => {
   const { shape, disabled, size, style, className } = props;
@@ -91,7 +91,6 @@ const Button = (props) => {
           className
         )}
         type="button"
-        onClick={handleOnClick}
       >
         {props.children}
       </button>
