@@ -72,6 +72,11 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 
+import { Client } from "appwrite";
+const client = new Client();
+
+client.setEndpoint("https://cloud.appwrite.io/v1").setProject("daywell");
+
 export default function App() {
   let tableStore = useRef(null);
 
