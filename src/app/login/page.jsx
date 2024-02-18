@@ -6,6 +6,8 @@ import { useUser } from "@/lib/context/user";
 export default function Login() {
   const user = useUser();
 
+  console.log(JSON.stringify(user, null, 2));
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
