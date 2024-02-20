@@ -1,9 +1,4 @@
-import {
-  DATABASE_ID,
-  COLLECTION_IDS,
-  account,
-  databases,
-} from "@/lib/appwrite";
+import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import BigTask, { Task } from "@/components/Task";
 import { Suspense } from "react";
@@ -27,7 +22,7 @@ export default async function Agenda() {
       <h1>AGENDA</h1>
       <div>
         {dbResponse.documents.map((doc) => (
-          <Suspense fallback={<div>loading...</div>}>
+          <Suspense key={doc.$id} fallback={<div>loading...</div>}>
             <BigTask
               key={doc.$id}
               id={doc.$id}
