@@ -2,6 +2,8 @@
 
 import { TrashIcon } from "@heroicons/react/20/solid";
 
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+
 import {
   classNames,
   priorityIsImportant,
@@ -202,7 +204,7 @@ export const Task = (props) => {
   };
 
   const handleToggleImportant = (event) => {
-    console.log("toggling important -- current priorty", priority);
+    // console.log("toggling important -- current priorty", priority);
     event.stopPropagation();
     onChange("priority", toggleImportant(priority));
   };
@@ -242,7 +244,12 @@ export const Task = (props) => {
 const TaskWithData = (props) => {
   const { id } = props;
 
-  const [editing, setEditing] = useState(props.editing);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const editing = searchParams.has("editing", id);
+
   const [priority, setTaskPriority] = useState(props.priority);
   const [done, setTaskDone] = useState(props.done);
   const [text, setTaskText] = useState(props.text);
@@ -258,7 +265,7 @@ const TaskWithData = (props) => {
         break;
       case "priority":
         // console.log("current priortiy", priority);
-        console.log("new priortiy value", value);
+        // console.log("new priortiy value", value);
         setTaskPriority(value);
         break;
       case "text":
@@ -273,7 +280,15 @@ const TaskWithData = (props) => {
   };
 
   const handleEditAreaClick = () => {
-    setEditing(!editing);
+    if (editing) {
+      const params = new URLSearchParams(searchParams);
+      params.delete("editing");
+      router.push(`${pathname}?${params.toString()}`);
+    } else {
+      const params = new URLSearchParams(searchParams);
+      params.set("editing", id);
+      router.push(`${pathname}?${params.toString()}`);
+    }
   };
 
   const handleDelete = () => {

@@ -6,6 +6,7 @@ import {
 } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import BigTask, { Task } from "@/components/Task";
+import { Suspense } from "react";
 
 export default async function Agenda() {
   let dbResponse = { documents: [] };
@@ -26,17 +27,17 @@ export default async function Agenda() {
       <h1>AGENDA</h1>
       <div>
         {dbResponse.documents.map((doc) => (
-          <>
+          <Suspense fallback={<div>loading...</div>}>
             <BigTask
               key={doc.$id}
+              id={doc.$id}
               text={doc.text}
               priority={doc.priority}
               done={doc.done}
               tagName={"stub tag name"}
-              editing={true}
               showTag={false}
             />
-          </>
+          </Suspense>
         ))}
       </div>
     </>

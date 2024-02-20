@@ -21,12 +21,12 @@ export function toggleUrgent(currentPriority) {
 }
 
 export function toggleImportant(currentPriority) {
-  console.log(
-    "toggleImportant. previous importance:",
-    priorityIsImportant(currentPriority)
-  );
+  // console.log(
+  //   "toggleImportant. previous importance:",
+  //   priorityIsImportant(currentPriority)
+  // );
   let newPriority = currentPriority;
-  console.log("important before", newPriority);
+  // console.log("important before", newPriority);
   if (priorityIsImportant(currentPriority)) {
     // so clear out that second bit by SUBTRACTING TWO
     newPriority = currentPriority - 1;
@@ -35,7 +35,7 @@ export function toggleImportant(currentPriority) {
     // set the bottom bit to 1 by ADDING ONE
     newPriority = currentPriority + 1;
   }
-  console.log("important after", newPriority);
+  // console.log("important after", newPriority);
   return newPriority;
 }
 
