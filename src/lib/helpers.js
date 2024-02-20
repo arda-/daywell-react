@@ -10,6 +10,8 @@ export function priorityIsImportant(priority) {
   return (priority & 0b01) === 0b01;
 }
 
+const priorityMap = {};
+
 export function toggleUrgent(currentPriority) {
   if (priorityIsUrgent(currentPriority)) {
     // so clear out that second bit by SUBTRACTING TWO

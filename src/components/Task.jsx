@@ -6,14 +6,7 @@ import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 
 import { useAgendaViewSettings } from "@/lib/context/agendaViewSettings";
 
-import {
-  classNames,
-  priorityIsImportant,
-  priorityIsUrgent,
-  toggleUrgent,
-  toggleImportant,
-  deleteTask,
-} from "@/lib/helpers";
+import { classNames } from "@/lib/helpers";
 import { useState } from "react";
 
 const ToggleButton = (props) => {
@@ -49,7 +42,6 @@ export const Task = (props) => {
     onEditAreaClick,
     text, // string
     tagName, // string
-    priority, // number
     done,
     editing, // boolean
   } = props;
@@ -204,16 +196,12 @@ export const Task = (props) => {
 
   const handleToggleUrgent = (event) => {
     event.stopPropagation();
-    const newPriority = toggleUrgent(priority);
-    console.log("toggling urgent, new priority", newPriority);
-    onChange("priority", newPriority);
+    onChange("urgent", !props.urgent);
   };
 
   const handleToggleImportant = (event) => {
     event.stopPropagation();
-    const newPriority = toggleImportant(priority);
-    console.log("toggling important, new priority", newPriority);
-    onChange("priority", newPriority);
+    onChange("important", !props.important);
   };
 
   const rightArea = (
@@ -222,13 +210,13 @@ export const Task = (props) => {
         className="w-8 h-8"
         buttonText="U"
         onClick={handleToggleUrgent}
-        selected={priorityIsUrgent(priority)}
+        selected={props.urgent}
       />
       <ToggleButton
         className="w-8 h-8"
         buttonText="I"
         onClick={handleToggleImportant}
-        selected={priorityIsImportant(priority)}
+        selected={props.important}
       />
     </div>
   );
@@ -251,13 +239,6 @@ export const Task = (props) => {
 const TaskWithData = (props) => {
   const { id } = props;
 
-  const [task, setTask] = useState({
-    priority: props.priority,
-    done: props.done,
-    text: props.text,
-    tagName: props.tagName,
-  });
-
   const { idActiveTask, setIdActiveTask } = useAgendaViewSettings();
 
   // TODO: figure out suspense for loading
@@ -272,7 +253,7 @@ const TaskWithData = (props) => {
           [field]: value,
         }
       );
-      setTask(newDoc);
+      props.listMutate();
     } catch (e) {
       console.error(e);
     }
@@ -283,7 +264,8 @@ const TaskWithData = (props) => {
     try {
       switch (field) {
         case "done":
-        case "priority":
+        case "urgent":
+        case "important":
         case "text":
           console.log(`updating ${field} to`, value);
           updateField(field, value);
@@ -311,8 +293,7 @@ const TaskWithData = (props) => {
     console.log("handling delete");
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_IDS.TODOS, id);
-
-      console.log("succesful delete, navigating...");
+      props.listMutate();
 
       if (idActiveTask === id) {
         setIdActiveTask("");
@@ -327,10 +308,11 @@ const TaskWithData = (props) => {
       <Task
         key={id}
         editing={idActiveTask === id}
-        priority={task.priority}
-        done={task.done}
-        text={task.text}
-        tagName={task.tagName}
+        urgent={props.urgent}
+        important={props.important}
+        done={props.done}
+        text={props.text}
+        tagName={props.tagName}
         onChange={handleChange}
         onEditAreaClick={handleEditAreaClick}
         onDelete={handleDelete}

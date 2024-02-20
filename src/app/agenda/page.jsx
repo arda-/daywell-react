@@ -1,9 +1,11 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
+import useSWR from "swr";
+
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 import { ID } from "appwrite";
 import BigTask, { Task } from "@/components/Task";
-import { Suspense, useEffect, useState } from "react";
 import BottomMenu from "@/components/BottomMenu";
 import Button from "@/components/Button";
 import { AgendaViewSettingsProvider } from "@/lib/context/agendaViewSettings";
@@ -28,28 +30,35 @@ async function createTask() {
   }
 }
 
+const fetchTasks = async () => {
+  try {
+    const dbResponse = await databases.listDocuments(
+      DATABASE_ID,
+      COLLECTION_IDS.TODOS,
+      []
+    );
+    console.log("got docs");
+    return dbResponse.documents;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+function useTasks() {
+  const { data, error, isLoading, mutate } = useSWR(`allTasks`, fetchTasks);
+
+  return {
+    tasks: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
 export default function Agenda() {
   const [idActiveTask, setIdActiveTask] = useState("");
 
-  const [tasks, setTasks] = useState([]);
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const dbResponse = await databases.listDocuments(
-        DATABASE_ID,
-        COLLECTION_IDS.TODOS,
-        []
-      );
-      console.log("got docs");
-      setTasks(dbResponse.documents);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const { tasks, error, isLoading, mutate } = useTasks();
 
   const handleClickAddTask = async (event) => {
     console.log("handleClickAddTask");
@@ -60,12 +69,17 @@ export default function Agenda() {
       if (!newDoc) {
         throw new Error("could not create new task");
       }
+      mutate();
       setIdActiveTask(newDoc.$id);
     } catch (e) {
       console.error(e);
     }
   };
 
+  if (error) return <div>failed to load</div>;
+  if (isLoading) return <div>loading AGENDA...</div>;
+
+  // render data
   return (
     <>
       <h1>AGENDA</h1>
@@ -74,17 +88,19 @@ export default function Agenda() {
         setIdActiveTask={setIdActiveTask}
       >
         <div>
-          {tasks.map((doc) => (
-            <Suspense key={doc.$id} fallback={<div>loading...</div>}>
+          {tasks.map((task) => (
+            <Suspense key={task.$id} fallback={<div>loading...</div>}>
               <BigTask
-                key={doc.$id}
-                id={doc.$id}
-                text={doc.text}
-                priority={doc.priority}
-                done={doc.done}
+                key={task.$id}
+                id={task.$id}
+                text={task.text}
+                urgent={task.urgent}
+                important={task.important}
+                done={task.done}
                 tagName={"stub tag name"}
-                editing={idActiveTask === doc.$id}
+                editing={idActiveTask === task.$id}
                 showTag={false}
+                listMutate={mutate}
               />
             </Suspense>
           ))}
