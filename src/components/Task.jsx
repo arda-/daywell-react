@@ -54,7 +54,7 @@ export const Task = (props) => {
     editing, // boolean
   } = props;
 
-  console.log("Pure Task, props:", JSON.stringify(props, null, 2));
+  // console.log("Pure Task, props:", JSON.stringify(props, null, 2));
 
   const taskClasses = `
     pl-3 pr-1 my-2 

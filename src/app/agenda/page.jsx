@@ -3,7 +3,7 @@
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 import { ID } from "appwrite";
 import BigTask, { Task } from "@/components/Task";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import BottomMenu from "@/components/BottomMenu";
 import Button from "@/components/Button";
 import { AgendaViewSettingsProvider } from "@/lib/context/agendaViewSettings";
@@ -28,25 +28,30 @@ async function createTask() {
   }
 }
 
-export default async function Agenda() {
+export default function Agenda() {
   const [idActiveTask, setIdActiveTask] = useState("");
 
-  let dbResponse = { documents: [] };
+  const [tasks, setTasks] = useState([]);
 
-  try {
-    dbResponse = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_IDS.TODOS,
-      []
-    );
-    // console.log(JSON.stringify(dbResponse, null, 2));
-  } catch (e) {
-    console.error(e);
-  }
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const dbResponse = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTION_IDS.TODOS,
+        []
+      );
+      console.log("got docs");
+      setTasks(dbResponse.documents);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleClickAddTask = async (event) => {
-    event.stopPropagation();
-
     console.log("handleClickAddTask");
 
     try {
@@ -69,7 +74,7 @@ export default async function Agenda() {
         setIdActiveTask={setIdActiveTask}
       >
         <div>
-          {dbResponse.documents.map((doc) => (
+          {tasks.map((doc) => (
             <Suspense key={doc.$id} fallback={<div>loading...</div>}>
               <BigTask
                 key={doc.$id}

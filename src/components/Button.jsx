@@ -91,6 +91,7 @@ const Button = (props) => {
           className
         )}
         type="button"
+        onClick={handleOnClick}
       >
         {props.children}
       </button>
