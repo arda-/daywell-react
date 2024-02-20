@@ -54,6 +54,8 @@ export const Task = (props) => {
     editing, // boolean
   } = props;
 
+  console.log("Pure Task, props:", JSON.stringify(props, null, 2));
+
   const taskClasses = `
     pl-3 pr-1 my-2 
     ${!editing ? "rounded-lg" : "rounded-xl"}
@@ -202,13 +204,16 @@ export const Task = (props) => {
 
   const handleToggleUrgent = (event) => {
     event.stopPropagation();
-    onChange("priority", toggleUrgent(priority));
+    const newPriority = toggleUrgent(priority);
+    console.log("toggling urgent, new priority", newPriority);
+    onChange("priority", newPriority);
   };
 
   const handleToggleImportant = (event) => {
-    // console.log("toggling important -- current priorty", priority);
     event.stopPropagation();
-    onChange("priority", toggleImportant(priority));
+    const newPriority = toggleImportant(priority);
+    console.log("toggling important, new priority", newPriority);
+    onChange("priority", newPriority);
   };
 
   const rightArea = (
@@ -246,38 +251,57 @@ export const Task = (props) => {
 const TaskWithData = (props) => {
   const { id } = props;
 
+  const [task, setTask] = useState({
+    priority: props.priority,
+    done: props.done,
+    text: props.text,
+    tagName: props.tagName,
+  });
+
+  // console.log("task from state", JSON.stringify(task, null, 2));
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const editing = searchParams.has("editing", id);
 
-  const [priority, setTaskPriority] = useState(props.priority);
-  const [done, setTaskDone] = useState(props.done);
-  const [text, setTaskText] = useState(props.text);
-  const [tagName, setTaskTagName] = useState(props.tagName);
-
   // TODO: figure out suspense for loading
+
+  const updateField = async (field, value) => {
+    try {
+      const newDoc = await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTION_IDS.TODOS,
+        id,
+        {
+          [field]: value,
+        }
+      );
+      setTask(newDoc);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleChange = (field, value) => {
     // TODO: update task
-    switch (field) {
-      case "done":
-        setTaskDone(value);
-        break;
-      case "priority":
-        // console.log("current priortiy", priority);
-        // console.log("new priortiy value", value);
-        setTaskPriority(value);
-        break;
-      case "text":
-        setTaskText(value);
-        break;
-      case "tagName":
-        setTaskTagName(value);
-        break;
-      default:
-        break;
+    try {
+      switch (field) {
+        case "done":
+        case "priority":
+        case "text":
+          console.log(`updating ${field} to`, value);
+          updateField(field, value);
+          break;
+        case "tagName":
+          setTaskTagName(value);
+          break;
+        default:
+          break;
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -311,17 +335,19 @@ const TaskWithData = (props) => {
   };
 
   return (
-    <Task
-      key={id}
-      editing={editing}
-      priority={priority}
-      done={done}
-      text={text}
-      tagName={tagName}
-      onChange={handleChange}
-      onEditAreaClick={handleEditAreaClick}
-      onDelete={handleDelete}
-    />
+    <>
+      <Task
+        key={id}
+        editing={editing}
+        priority={task.priority}
+        done={task.done}
+        text={task.text}
+        tagName={task.tagName}
+        onChange={handleChange}
+        onEditAreaClick={handleEditAreaClick}
+        onDelete={handleDelete}
+      />
+    </>
   );
 };
 

@@ -41,7 +41,7 @@ export default async function Agenda() {
       COLLECTION_IDS.TODOS,
       []
     );
-    console.log(JSON.stringify(dbResponse, null, 2));
+    // console.log(JSON.stringify(dbResponse, null, 2));
   } catch (e) {
     console.error(e);
   }
@@ -83,7 +83,6 @@ export default async function Agenda() {
               done={doc.done}
               tagName={"stub tag name"}
               showTag={false}
-              onDelete={handleDeleteTask()}
             />
           </Suspense>
         ))}
@@ -102,7 +101,6 @@ export default async function Agenda() {
         <Button className="ml-1" onClick={handleClickAddTask} style={"primary"}>
           Add Task
         </Button>
-        <button onClick={handleClickAddTask}>test</button>
       </BottomMenu>
     </>
   );
