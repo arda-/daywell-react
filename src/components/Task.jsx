@@ -1,8 +1,6 @@
+"use client";
+
 import { TrashIcon } from "@heroicons/react/20/solid";
-
-import { useState, useMemo, useRef } from "react";
-
-import { useRow, useValue, useStore } from "tinybase/ui-react";
 
 import {
   classNames,
@@ -11,8 +9,8 @@ import {
   toggleUrgent,
   toggleImportant,
   deleteTask,
-} from "lib/helpers";
-import { TagDropdown } from "components/TagDropdown";
+} from "@/lib/helpers";
+import { useState } from "react";
 
 const ToggleButton = (props) => {
   const styleClasses = `
@@ -41,94 +39,81 @@ const ToggleButton = (props) => {
 };
 
 export const Task = (props) => {
-  const appStateStore = useStore("appStateStore");
-  const tableStore = useStore("tableStore");
-
-  let task = useRow("task", props.id, tableStore);
-  const idActiveTask = useValue("activeTask", appStateStore);
-
-  const editing = useMemo(() => {
-    return props.id === idActiveTask;
-  }, [props.id, idActiveTask]);
-
-  const taskTextRef = useRef(null);
-  const taskTagMenuRef = useRef(null);
-
-  const handleClickTaskBody = (event) => {
-    if (!editing) {
-      appStateStore.setValue("activeTask", props.id);
-    } else {
-      appStateStore.setValue("activeTask", -1);
-    }
-  };
+  const {
+    onChange,
+    onDelete,
+    onEditAreaClick,
+    text, // string
+    tagName, // string
+    priority, // number
+    done,
+    editing, // boolean
+  } = props;
 
   const taskClasses = `
-  pl-3 pr-1 my-2 
-  ${!editing ? "rounded-lg" : "rounded-xl"}
-  hover:bg-amber-100/50
-  hover:ring-1 
-  ${!editing && "hover:shadow-sm"}
-  ring-inset ring-amber-100/25
-  ${editing && "shadow-md bg-amber-50 ring-1 ring-amber-100/50"}
+    pl-3 pr-1 my-2 
+    ${!editing ? "rounded-lg" : "rounded-xl"}
+    hover:bg-amber-100/50
+    hover:ring-1 
+    ${!editing && "hover:shadow-sm"}
+    ring-inset ring-amber-100/25
+    ${editing && "shadow-md bg-amber-50 ring-1 ring-amber-100/50"}
   `;
 
-  const centerAreaClasses = `
-  
-  `;
-
-  const handleClickCheckbox = (event) => {
+  const handleToggleCheckbox = (event) => {
     event.stopPropagation();
-  };
-
-  const handleToggleImportant = (event) => {
-    event.stopPropagation();
-    toggleImportant(props.id, task.priority, tableStore);
-  };
-
-  const handleToggleUrgent = (event) => {
-    event.stopPropagation();
-    toggleUrgent(props.id, task.priority, tableStore);
+    onChange("done", !done);
   };
 
   const handleClickTrash = (event) => {
     event.stopPropagation();
-    deleteTask(props.id, tableStore, appStateStore);
+    onDelete();
   };
 
-  const handleChangeTag = (idSelectedTag) => {
-    // console.log("handleChangeTag", idSelectedTag)
-    // console.log("value before changing", tableStore.getCell('task', props.id, 'idTag'))
-    tableStore.setCell("task", props.id, "idTag", idSelectedTag);
-    // console.log("value after changing", tableStore.getCell('task', props.id, 'idTag'))
-  };
-
-  const handleChangeText = (e) => {
-    const newText = e.target.value;
-    tableStore.setCell("task", props.id, "text", newText);
-  };
-
-  const handleClickTextBox = (event) => {
-    console.log("clicked text box, blocking propagation");
+  const handleClickTaskBody = (event) => {
     event.stopPropagation();
+    onEditAreaClick();
   };
 
-  function handleTextboxKeypress(e) {
-    if (e.key === "Enter") {
-      appStateStore.setValue("activeTask", -1);
-    }
-  }
-
-  const [mouseIn, setMouseIn] = useState(false);
-
-  function handleMouseEnter() {
-    setMouseIn(true);
-    appStateStore.setValue("hoveredTask", props.id);
-  }
-
-  function handleMouseLeave() {
-    setMouseIn(false);
-    appStateStore.setValue("hoveredTask", -1);
-  }
+  const leftArea = (
+    <div className="flex flex-col justify-center">
+      <div className="flex flex-col justify-center">
+        <input
+          id="done"
+          aria-describedby="done-description"
+          name="done"
+          type="checkbox"
+          className="
+            h-4 w-4 mr-0.5
+            rounded border-2
+            border-neutral-300 hover:border-amber-600
+            cursor-pointer
+            text-amber-600 focus:ring-amber-600
+            "
+          defaultChecked={done}
+          onClick={handleToggleCheckbox}
+        />
+      </div>
+      {editing && (
+        <button
+          type="button"
+          className="
+        -mx-1
+        flex 
+        w-6 h-6˚
+        mt-2
+        items-center justify-center 
+        rounded-full 
+        text-neutral-400 hover:text-neutral-500
+        "
+          onClick={handleClickTrash}
+        >
+          <TrashIcon className="h-5 w-5" aria-hidden="true" />
+          <span className="sr-only">Delete</span>
+        </button>
+      )}
+    </div>
+  );
 
   const uneditableCenterArea = (
     <div className="text-left leading-tight">
@@ -136,24 +121,34 @@ export const Task = (props) => {
         htmlFor="comments"
         className={classNames(
           ``,
-          task.text
+          text
             ? "font-medium text-neutral-900"
             : "font-normal italic text-neutral-400"
         )}
       >
-        {task.text || "New Task"}
+        {text || "New Task"}
       </label>
 
-      {task.idTag > 0 && !appStateStore.getValue("groupByTag") && (
+      {props.showTag && (
         <p
           id="comments-description"
           className="mt-0.5 text-neutral-500 tracking"
         >
-          {tableStore.getCell("tag", task.idTag, "text")}
+          {tagName}
         </p>
       )}
     </div>
   );
+
+  const handleChangeText = (e) => {
+    const newText = e.target.value;
+    onChange("text", newText);
+  };
+
+  const handleClickTextBox = (event) => {
+    console.log("clicked text box, blocking propagation");
+    event.stopPropagation();
+  };
 
   const editableCenterArea = (
     <>
@@ -162,7 +157,6 @@ export const Task = (props) => {
           Task Text
         </label>
         <input
-          ref={taskTextRef}
           type="text"
           name="text"
           id="text"
@@ -173,100 +167,132 @@ export const Task = (props) => {
         shadow-sm ring-1 ring-inset ring-neutral-300  
         focus:ring-2 focus:ring-inset focus:ring-amber-600"
           placeholder="task text"
-          defaultValue={task.text}
+          defaultValue={text}
           onChange={handleChangeText}
           onClick={handleClickTextBox}
-          onKeyPress={handleTextboxKeypress}
-          autoFocus={task.text === ""}
+          autoFocus={text === ""}
         />
       </div>
 
-      <div ref={taskTagMenuRef} className="mt-1">
+      <div className="mt-1">
         <span className="text-neutral-700 font-medium text-sm mr-1">TAG:</span>
-        <TagDropdown
-          idActiveTag={task.idTag}
-          tableStore={tableStore}
-          onChange={handleChangeTag}
-          onClick={() => {}}
-        />
+        <div>tag dropdown cgoes here</div>
       </div>
     </>
+  );
+
+  const centerArea = (
+    <button
+      className="
+      py-2 px-2
+      leading-6 w-full 
+      active:bg-amber-100 
+      rounded-lg
+      focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600
+      flex flex-col items-start"
+      onClick={handleClickTaskBody}
+    >
+      {editing ? editableCenterArea : uneditableCenterArea}
+    </button>
+  );
+
+  const handleToggleUrgent = (event) => {
+    event.stopPropagation();
+    onChange("priority", toggleUrgent(priority));
+  };
+
+  const handleToggleImportant = (event) => {
+    console.log("toggling important -- current priorty", priority);
+    event.stopPropagation();
+    onChange("priority", toggleImportant(priority));
+  };
+
+  const rightArea = (
+    <div className="flex items-center h-100">
+      <ToggleButton
+        className="w-8 h-8"
+        buttonText="U"
+        onClick={handleToggleUrgent}
+        selected={priorityIsUrgent(priority)}
+      />
+      <ToggleButton
+        className="w-8 h-8"
+        buttonText="I"
+        onClick={handleToggleImportant}
+        selected={priorityIsImportant(priority)}
+      />
+    </div>
   );
 
   return (
     <div
       className={taskClasses}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      // onMouseEnter={handleMouseEnter}
+      // onMouseLeave={handleMouseLeave}
     >
       <div className="relative flex">
-        <div className="flex flex-col justify-center">
-          <div className="flex flex-col justify-center">
-            <input
-              id="done"
-              aria-describedby="done-description"
-              name="done"
-              type="checkbox"
-              className="
-          h-4 w-4 mr-0.5
-          rounded border-2
-          border-neutral-300 hover:border-amber-600
-          cursor-pointer
-          text-amber-600 focus:ring-amber-600
-          "
-              defaultChecked={task.done}
-              onClick={handleClickCheckbox}
-              onChange={() =>
-                tableStore.setCell("task", props.id, "done", !task.done)
-              }
-            />
-          </div>
-          {editing && (
-            <button
-              type="button"
-              className="
-            -mx-1
-            flex 
-            w-6 h-6˚
-            mt-2
-            items-center justify-center 
-            rounded-full 
-            text-neutral-400 hover:text-neutral-500
-            "
-              onClick={handleClickTrash}
-            >
-              <TrashIcon className="h-5 w-5" aria-hidden="true" />
-              <span className="sr-only">Delete</span>
-            </button>
-          )}
-        </div>
-        <button
-          className="
-          py-2 px-2
-          leading-6 w-full 
-          active:bg-amber-100 
-          rounded-lg
-          focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600
-          flex flex-col items-start"
-          onClick={handleClickTaskBody}
-        >
-          {editing ? editableCenterArea : uneditableCenterArea}
-        </button>
-        <div className="flex items-center h-100">
-          <ToggleButton
-            className="w-8 h-8"
-            buttonText="U"
-            onClick={handleToggleUrgent}
-            selected={priorityIsUrgent(task.priority)}
-          />
-          <ToggleButton
-            className="w-8 h-8"
-            buttonText="I"
-            onClick={handleToggleImportant}
-            selected={priorityIsImportant(task.priority)}
-          />
-        </div>
+        {leftArea}
+        {centerArea}
+        {rightArea}
       </div>
     </div>
   );
 };
+
+const TaskWithData = (props) => {
+  const { id } = props;
+
+  const [editing, setEditing] = useState(props.editing);
+  const [priority, setTaskPriority] = useState(props.priority);
+  const [done, setTaskDone] = useState(props.done);
+  const [text, setTaskText] = useState(props.text);
+  const [tagName, setTaskTagName] = useState(props.tagName);
+
+  // TODO: figure out suspense for loading
+
+  const handleChange = (field, value) => {
+    // TODO: update task
+    switch (field) {
+      case "done":
+        setTaskDone(value);
+        break;
+      case "priority":
+        // console.log("current priortiy", priority);
+        console.log("new priortiy value", value);
+        setTaskPriority(value);
+        break;
+      case "text":
+        setTaskText(value);
+        break;
+      case "tagName":
+        setTaskTagName(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleEditAreaClick = () => {
+    setEditing(!editing);
+  };
+
+  const handleDelete = () => {
+    // TODO: delete task
+  };
+
+  return (
+    <Task
+      key={id}
+      editing={editing}
+      priority={priority}
+      done={done}
+      text={text}
+      tagName={tagName}
+      onChange={handleChange}
+      onEditAreaClick={handleEditAreaClick}
+      onDelete={handleDelete}
+    />
+  );
+};
+
+export default TaskWithData;
