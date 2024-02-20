@@ -83,6 +83,7 @@ export default async function Agenda() {
               done={doc.done}
               tagName={"stub tag name"}
               showTag={false}
+              onDelete={handleDeleteTask()}
             />
           </Suspense>
         ))}

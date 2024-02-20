@@ -4,6 +4,8 @@ import { TrashIcon } from "@heroicons/react/20/solid";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
+
 import {
   classNames,
   priorityIsImportant,
@@ -291,8 +293,21 @@ const TaskWithData = (props) => {
     }
   };
 
-  const handleDelete = () => {
-    // TODO: delete task
+  const handleDelete = async () => {
+    console.log("handling delete");
+    try {
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_IDS.TODOS, id);
+
+      console.log("succesful delete, navigating...");
+
+      if (editing) {
+        const params = new URLSearchParams(searchParams);
+        params.delete("editing");
+        router.push(`${pathname}?${params.toString()}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
