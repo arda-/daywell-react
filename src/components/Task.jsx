@@ -2,9 +2,9 @@
 
 import { TrashIcon } from "@heroicons/react/20/solid";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
+
+import { useAgendaViewSettings } from "@/lib/context/agendaViewSettings";
 
 import {
   classNames,
@@ -258,13 +258,7 @@ const TaskWithData = (props) => {
     tagName: props.tagName,
   });
 
-  // console.log("task from state", JSON.stringify(task, null, 2));
-
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const editing = searchParams.has("editing", id);
+  const { idActiveTask, setIdActiveTask } = useAgendaViewSettings();
 
   // TODO: figure out suspense for loading
 
@@ -306,14 +300,10 @@ const TaskWithData = (props) => {
   };
 
   const handleEditAreaClick = () => {
-    if (editing) {
-      const params = new URLSearchParams(searchParams);
-      params.delete("editing");
-      router.push(`${pathname}?${params.toString()}`);
+    if (idActiveTask === id) {
+      setIdActiveTask("");
     } else {
-      const params = new URLSearchParams(searchParams);
-      params.set("editing", id);
-      router.push(`${pathname}?${params.toString()}`);
+      setIdActiveTask(id);
     }
   };
 
@@ -324,10 +314,8 @@ const TaskWithData = (props) => {
 
       console.log("succesful delete, navigating...");
 
-      if (editing) {
-        const params = new URLSearchParams(searchParams);
-        params.delete("editing");
-        router.push(`${pathname}?${params.toString()}`);
+      if (idActiveTask === id) {
+        setIdActiveTask("");
       }
     } catch (e) {
       console.error(e);
@@ -338,7 +326,7 @@ const TaskWithData = (props) => {
     <>
       <Task
         key={id}
-        editing={editing}
+        editing={idActiveTask === id}
         priority={task.priority}
         done={task.done}
         text={task.text}
