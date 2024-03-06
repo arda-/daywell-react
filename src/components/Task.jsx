@@ -1,5 +1,3 @@
-"use client";
-
 import { TrashIcon } from "@heroicons/react/20/solid";
 
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
@@ -7,7 +5,6 @@ import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 import { useAgendaViewSettings } from "@/lib/context/agendaViewSettings";
 
 import { classNames } from "@/lib/helpers";
-import { useState } from "react";
 
 const ToggleButton = (props) => {
   const styleClasses = `
