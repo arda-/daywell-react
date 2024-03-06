@@ -31,6 +31,50 @@ async function createTask() {
   }
 }
 
+async function setActiveTask(idViewSetting, idActiveTask) {
+  console.log("setActiveTask");
+  try {
+    const dbResponse = await databases.updateDocument(
+      DATABASE_ID,
+      COLLECTION_IDS.VIEW_SETTINGS,
+      idViewSetting,
+      {
+        activeTask: idActiveTask,
+      }
+    );
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const fetchViewSettings = async () => {
+  try {
+    const dbResponse = await databases.listDocuments(
+      DATABASE_ID,
+      COLLECTION_IDS.VIEW_SETTINGS,
+      []
+    );
+    console.log("fetched view settings");
+    return dbResponse.documents;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+function useViewSettings() {
+  const { data, error, isLoading, mutate } = useSWR(
+    `viewSettings`,
+    fetchViewSettings
+  );
+
+  return {
+    viewSettings: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
 const fetchTasks = async () => {
   try {
     const dbResponse = await databases.listDocuments(
@@ -38,7 +82,7 @@ const fetchTasks = async () => {
       COLLECTION_IDS.TODOS,
       []
     );
-    console.log("got docs");
+    console.log("fetched tasks");
     return dbResponse.documents;
   } catch (e) {
     console.error(e);
@@ -57,9 +101,26 @@ function useTasks() {
 }
 
 export default function Agenda() {
-  const [idActiveTask, setIdActiveTask] = useState("");
+  const {
+    tasks,
+    error: taskError,
+    isLoading: loadingTasks,
+    mutate: mutateTasks,
+  } = useTasks();
 
-  const { tasks, error, isLoading, mutate } = useTasks();
+  const {
+    viewSettings,
+    error: viewSettingsError,
+    isLoading: loadingViewSettings,
+    mutate: mutateViewSettings,
+  } = useViewSettings();
+
+  if (taskError) return <div>failed to load tasks</div>;
+  if (viewSettingsError) return <div>failed to load viewSettings</div>;
+  if (loadingTasks || loadingViewSettings) return <div>loading AGENDA...</div>;
+
+  const idViewSettings = viewSettings?.length > 0 ?? viewSettings[0]["$id"];
+  const idActiveTask = () => viewSettings[0].activeTask["$id"];
 
   const handleClickAddTask = async (event) => {
     console.log("handleClickAddTask");
@@ -70,24 +131,22 @@ export default function Agenda() {
       if (!newDoc) {
         throw new Error("could not create new task");
       }
-      mutate();
-      setIdActiveTask(newDoc.$id);
+      mutateTasks();
+      setActiveTask(idViewSettings, newDoc.$id);
     } catch (e) {
       console.error(e);
     }
   };
-
-  if (error) return <div>failed to load</div>;
-  if (isLoading) return <div>loading AGENDA...</div>;
 
   // render data
   return (
     <>
       <h1>AGENDA</h1>
       <AgendaViewSettingsProvider
-        idActiveTask={idActiveTask}
-        setIdActiveTask={setIdActiveTask}
+        idActiveTask={idActiveTask()}
+        setIdActiveTask={setActiveTask}
       >
+        <div>{JSON.stringify(idActiveTask(), null, 2)}</div>
         <div>
           {tasks.map((task) => (
             <Suspense key={task.$id} fallback={<div>loading...</div>}>
@@ -99,9 +158,9 @@ export default function Agenda() {
                 important={task.important}
                 done={task.done}
                 tagName={"stub tag name"}
-                editing={idActiveTask === task.$id}
+                editing={idActiveTask() === task.$id}
                 showTag={false}
-                listMutate={mutate}
+                listMutate={mutateTasks}
               />
             </Suspense>
           ))}

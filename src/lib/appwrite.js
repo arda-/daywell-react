@@ -5,6 +5,7 @@ export const DATABASE_ID = "daywell-main-db";
 export const COLLECTION_IDS = {
   TAGS: "tags",
   TODOS: "todos",
+  VIEW_SETTINGS: "viewSettings",
 };
 
 const client = new Client();
