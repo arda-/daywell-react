@@ -1,5 +1,3 @@
-"use client";
-
 import { ClerkProvider } from "@clerk/nextjs";
 
 // import type { Metadata } from "next";
