@@ -1,3 +1,5 @@
+import { UserButton } from "@clerk/nextjs";
+
 const navigation = [
   { name: "Dashboard", href: "#", current: true },
   { name: "Tags", href: "tags", current: false },
@@ -6,5 +8,10 @@ const navigation = [
 ];
 
 export default function Example() {
-  return <div>Nav bar will eventually go here.</div>;
+  return (
+    <div className="flex justify-between items-center bg-amber-600 p-2">
+      <div>Nav bar will eventually go here.</div>
+      <UserButton />
+    </div>
+  );
 }
