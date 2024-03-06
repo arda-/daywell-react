@@ -19,7 +19,8 @@ async function createTask() {
       ID.unique(),
       {
         text: "New Task",
-        priority: 0,
+        urgent: false,
+        important: false,
         done: false,
       }
     );
