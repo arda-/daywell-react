@@ -22,6 +22,22 @@ export function toggleUrgent(currentPriority) {
   }
 }
 
+export async function setActiveTask(idViewSetting, idActiveTask) {
+  console.log("setActiveTask");
+  try {
+    const dbResponse = await databases.updateDocument(
+      DATABASE_ID,
+      COLLECTION_IDS.VIEW_SETTINGS,
+      idViewSetting,
+      {
+        activeTask: idActiveTask,
+      }
+    );
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 export function toggleImportant(currentPriority) {
   // console.log(
   //   "toggleImportant. previous importance:",
