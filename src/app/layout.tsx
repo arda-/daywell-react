@@ -25,8 +25,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>
+      <html lang="en" className="h-full w-full">
+        <body className={`h-full w-full ${inter.className}`}>
           {/* <UserProvider> */}
           <Nav />
           <Suspense fallback={<div>loading child route...</div>}>

@@ -9,7 +9,7 @@ const navigation = [
 
 export default function Example() {
   return (
-    <div className="flex justify-between items-center bg-amber-600 p-2">
+    <div className="flex justify-between items-center bg-amber-600 p-2 sticky top-0 z-50">
       <div>Nav bar will eventually go here.</div>
       <UserButton />
     </div>
