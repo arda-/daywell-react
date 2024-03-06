@@ -33,7 +33,7 @@ export default function Agenda() {
   if (loadingTasks || loadingViewSettings) return <div>loading AGENDA...</div>;
 
   const idViewSettings = viewSettings?.length > 0 ?? viewSettings[0]["$id"];
-  const idActiveTask = () => viewSettings[0].activeTask["$id"];
+  const idActiveTask = () => viewSettings[0].activeTask?.$id;
 
   const handleClickAddTask = async (event) => {
     console.log("handleClickAddTask");
@@ -46,6 +46,7 @@ export default function Agenda() {
       }
       mutateTasks();
       setActiveTask(idViewSettings, newDoc.$id);
+      mutateViewSettings();
     } catch (e) {
       console.error(e);
     }
@@ -55,49 +56,40 @@ export default function Agenda() {
   return (
     <>
       <h1>AGENDA</h1>
-      <AgendaViewSettingsProvider
-        idActiveTask={idActiveTask()}
-        setIdActiveTask={setActiveTask}
-      >
-        <div>{JSON.stringify(idActiveTask(), null, 2)}</div>
-        <div>
-          {tasks.map((task) => (
-            <Suspense key={task.$id} fallback={<div>loading...</div>}>
-              <BigTask
-                key={task.$id}
-                id={task.$id}
-                text={task.text}
-                urgent={task.urgent}
-                important={task.important}
-                done={task.done}
-                tagName={"stub tag name"}
-                editing={idActiveTask() === task.$id}
-                showTag={false}
-                listMutate={mutateTasks}
-              />
-            </Suspense>
-          ))}
-        </div>
-        <BottomMenu>
-          <Button onClick={() => {}} className="mr-1">
-            Group by Tag
-          </Button>
-          <Button
-            onClick={() => {}}
-            className="mx-1"
-            // style={"soft"}
-          >
-            Prioritize
-          </Button>
-          <Button
-            className="ml-1"
-            onClick={handleClickAddTask}
-            style={"primary"}
-          >
-            Add Task
-          </Button>
-        </BottomMenu>
-      </AgendaViewSettingsProvider>
+      <div>active task id: {JSON.stringify(idActiveTask(), null, 2)}</div>
+      <div>
+        {tasks.map((task) => (
+          <Suspense key={task.$id} fallback={<div>loading...</div>}>
+            <BigTask
+              key={task.$id}
+              id={task.$id}
+              text={task.text}
+              urgent={task.urgent}
+              important={task.important}
+              done={task.done}
+              tagName={"stub tag name"}
+              editing={idActiveTask() === task.$id}
+              showTag={false}
+              listMutate={mutateTasks}
+            />
+          </Suspense>
+        ))}
+      </div>
+      <BottomMenu>
+        <Button onClick={() => {}} className="mr-1">
+          Group by Tag
+        </Button>
+        <Button
+          onClick={() => {}}
+          className="mx-1"
+          // style={"soft"}
+        >
+          Prioritize
+        </Button>
+        <Button className="ml-1" onClick={handleClickAddTask} style={"primary"}>
+          Add Task
+        </Button>
+      </BottomMenu>
     </>
   );
 }

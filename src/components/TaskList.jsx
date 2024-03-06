@@ -71,14 +71,7 @@ export function GroupedTaskList(props) {
             </h2>
           )}
           {!!x.taskIds.length &&
-            x.taskIds.map((id) => (
-              <Task
-                key={id}
-                id={id}
-                tableStore={tableStore}
-                appStateStore={appStateStore}
-              />
-            ))}
+            x.taskIds.map((id) => <Task key={id} id={id} />)}
           {!!!x.taskIds.length && (
             <div className="mx-2">
               <p

@@ -2,7 +2,7 @@ import { TrashIcon } from "@heroicons/react/20/solid";
 
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 
-import { useAgendaViewSettings } from "@/lib/context/agendaViewSettings";
+import { useViewSettings, setActiveTask } from "@/lib/dataHelpers";
 
 import { classNames } from "@/lib/helpers";
 
@@ -236,7 +236,15 @@ export const Task = (props) => {
 const TaskWithData = (props) => {
   const { id } = props;
 
-  const { idActiveTask, setIdActiveTask } = useAgendaViewSettings();
+  const {
+    viewSettings,
+    error: viewSettingsError,
+    isLoading: loadingViewSettings,
+    mutate: mutateViewSettings,
+  } = useViewSettings();
+
+  const idActiveTask = () => viewSettings[0].activeTask?.$id;
+  const idViewSetting = viewSettings[0]["$id"];
 
   // TODO: figure out suspense for loading
 
@@ -256,7 +264,7 @@ const TaskWithData = (props) => {
     }
   };
 
-  const handleChange = (field, value) => {
+  const handleChange = async (field, value) => {
     // TODO: update task
     try {
       switch (field) {
@@ -265,10 +273,10 @@ const TaskWithData = (props) => {
         case "important":
         case "text":
           console.log(`updating ${field} to`, value);
-          updateField(field, value);
+          await updateField(field, value);
           break;
         case "tagName":
-          setTaskTagName(value);
+          await setTaskTagName(value);
           break;
         default:
           break;
@@ -278,11 +286,16 @@ const TaskWithData = (props) => {
     }
   };
 
-  const handleEditAreaClick = () => {
-    if (idActiveTask === id) {
-      setIdActiveTask("");
-    } else {
-      setIdActiveTask(id);
+  const handleEditAreaClick = async () => {
+    try {
+      if (idActiveTask() === id) {
+        await setActiveTask(idViewSetting, null);
+      } else {
+        await setActiveTask(idViewSetting, id);
+      }
+      mutateViewSettings();
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -290,31 +303,30 @@ const TaskWithData = (props) => {
     console.log("handling delete");
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_IDS.TODOS, id);
-      props.listMutate();
 
-      if (idActiveTask === id) {
-        setIdActiveTask("");
+      if (idActiveTask() === id) {
+        await setActiveTask(idViewSetting, null);
+        mutateViewSettings();
       }
+      props.listMutate();
     } catch (e) {
       console.error(e);
     }
   };
 
   return (
-    <>
-      <Task
-        key={id}
-        editing={idActiveTask === id}
-        urgent={props.urgent}
-        important={props.important}
-        done={props.done}
-        text={props.text}
-        tagName={props.tagName}
-        onChange={handleChange}
-        onEditAreaClick={handleEditAreaClick}
-        onDelete={handleDelete}
-      />
-    </>
+    <Task
+      key={id}
+      editing={props.editing}
+      urgent={props.urgent}
+      important={props.important}
+      done={props.done}
+      text={props.text}
+      tagName={props.tagName}
+      onChange={handleChange}
+      onEditAreaClick={handleEditAreaClick}
+      onDelete={handleDelete}
+    />
   );
 };
 

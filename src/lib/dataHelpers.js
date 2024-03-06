@@ -10,7 +10,10 @@ export async function fetchViewSettings() {
       COLLECTION_IDS.VIEW_SETTINGS,
       []
     );
-    console.log("fetched view settings");
+    console.log(
+      "fetched view settings",
+      JSON.stringify(dbResponse.documents, null, 2)
+    );
     return dbResponse.documents;
   } catch (e) {
     console.error(e);
@@ -23,16 +26,21 @@ export function useViewSettings() {
     fetchViewSettings
   );
 
+  const middlemanMutate = () => {
+    console.log("mutated view settings");
+    mutate();
+  };
+
   return {
     viewSettings: data,
     isLoading,
     error,
-    mutate,
+    mutate: middlemanMutate,
   };
 }
 
 export async function setActiveTask(idViewSetting, idActiveTask) {
-  console.log("setActiveTask");
+  console.log("calling setActiveTask", idViewSetting, idActiveTask);
   try {
     const dbResponse = await databases.updateDocument(
       DATABASE_ID,
@@ -41,6 +49,10 @@ export async function setActiveTask(idViewSetting, idActiveTask) {
       {
         activeTask: idActiveTask,
       }
+    );
+    console.log(
+      "set active task",
+      JSON.stringify(dbResponse.document, null, 2)
     );
   } catch (e) {
     console.error(e);
