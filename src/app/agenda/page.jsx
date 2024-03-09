@@ -1,79 +1,88 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import BigTask from "@/components/Task";
 import BottomMenu from "@/components/BottomMenu";
 import Button from "@/components/Button";
 
 import {
-  fetchTasks,
+  useTasks,
   useViewSettings,
   setActiveTask,
   createTask,
   fetchViewSettings,
 } from "@/lib/dataHelpers";
 
+import { useQueryClient } from "@tanstack/react-query";
+
+const handleClickAddTask = async (event) => {
+  console.log("handleClickAddTask");
+
+  try {
+    const newDoc = await createTask(); // TODO: this is async and can error.
+
+    if (!newDoc) {
+      throw new Error("could not create new task");
+    }
+    mutateTasks();
+    setActiveTask(idViewSettings, newDoc.$id);
+    mutateViewSettings();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export default function Agenda() {
+  const queryClient = useQueryClient();
   const {
+    status: tasksStatus,
     tasks,
-    error: taskError,
-    isLoading: loadingTasks,
-    mutate: mutateTasks,
+    error: tasksError,
+    isFetching: fetchingTasks,
   } = useTasks();
 
+  const [test, setTest] = useState(0);
+
+  useEffect(() => {
+    console.log(tasksStatus, tasks, tasksError, fetchingTasks);
+    setTest(test + 1);
+  }, [tasksStatus, tasks, tasksError, fetchingTasks]);
+
   const {
+    status: viewSettingsStatus,
     viewSettings,
     error: viewSettingsError,
-    isLoading: loadingViewSettings,
-    mutate: mutateViewSettings,
+    isFetching: fetchingViewSettings,
   } = useViewSettings();
 
-  if (taskError) return <div>failed to load tasks</div>;
+  if (tasksError) return <div>failed to load tasks</div>;
   if (viewSettingsError) return <div>failed to load viewSettings</div>;
-  if (loadingTasks || loadingViewSettings) return <div>loading AGENDA...</div>;
+  // if (fetchingTasks || fetchingViewSettings) {
+  //   return <div>loading AGENDA...</div>;
+  // }
 
-  const idViewSettings = viewSettings?.length > 0 ?? viewSettings[0]["$id"];
-  const idActiveTask = () => viewSettings[0].activeTask?.$id;
-
-  const handleClickAddTask = async (event) => {
-    console.log("handleClickAddTask");
-
-    try {
-      const newDoc = await createTask(); // TODO: this is async and can error.
-
-      if (!newDoc) {
-        throw new Error("could not create new task");
-      }
-      mutateTasks();
-      setActiveTask(idViewSettings, newDoc.$id);
-      mutateViewSettings();
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const idActiveTask = viewSettings?.length > 0 ?? viewSettings[0]?.$id;
 
   // render data
   return (
     <>
       <h1>AGENDA</h1>
-      <div>active task id: {JSON.stringify(idActiveTask(), null, 2)}</div>
+      <div>idActiveTask: {idActiveTask}</div>
+      {tasksStatus === "pending" && <div>loading tasks...</div>}
       <div>
-        {tasks.map((task) => (
-          <Suspense key={task.$id} fallback={<div>loading...</div>}>
-            <BigTask
-              key={task.$id}
-              id={task.$id}
-              text={task.text}
-              urgent={task.urgent}
-              important={task.important}
-              done={task.done}
-              tagName={"stub tag name"}
-              editing={idActiveTask() === task.$id}
-              showTag={false}
-              listMutate={mutateTasks}
-            />
-          </Suspense>
+        {tasks?.map((task) => (
+          <BigTask
+            key={task.$id}
+            id={task.$id}
+            text={task.text}
+            urgent={task.urgent}
+            important={task.important}
+            done={task.done}
+            tagName={"stub tag name"}
+            editing={idActiveTask === task.$id}
+            showTag={false}
+          />
         ))}
       </div>
       <BottomMenu>

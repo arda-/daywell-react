@@ -1,7 +1,11 @@
-import useSWR from "swr";
-
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 import { ID } from "appwrite";
+import {
+  useQuery,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 export async function fetchViewSettings() {
   try {
@@ -21,21 +25,21 @@ export async function fetchViewSettings() {
 }
 
 export function useViewSettings() {
-  const { data, error, isLoading, mutate } = useSWR(
-    `viewSettings`,
-    fetchViewSettings
-  );
-
-  const middlemanMutate = () => {
-    console.log("mutated view settings");
-    mutate();
-  };
+  const {
+    status,
+    data: viewSettings,
+    error,
+    isFetching,
+  } = useQuery({
+    queryKey: "viewSettings",
+    queryFn: fetchViewSettings,
+  });
 
   return {
-    viewSettings: data,
-    isLoading,
+    status,
+    viewSettings,
     error,
-    mutate: middlemanMutate,
+    isFetching,
   };
 }
 
@@ -87,7 +91,7 @@ export async function fetchTasks() {
       COLLECTION_IDS.TODOS,
       []
     );
-    console.log("fetched tasks");
+    console.log("fetched tasks", dbResponse.documents);
     return dbResponse.documents;
   } catch (e) {
     console.error(e);
@@ -95,13 +99,23 @@ export async function fetchTasks() {
 }
 
 export function useTasks() {
-  const { data, error, isLoading, mutate } = useSWR(`allTasks`, fetchTasks);
+  const {
+    status,
+    data: tasks,
+    error,
+    isFetching,
+  } = useQuery({
+    queryKey: "tasks",
+    queryFn: fetchTasks,
+  });
+
+  console.log(status, tasks, error, isFetching);
 
   return {
-    tasks: data,
-    isLoading,
+    status,
+    tasks,
     error,
-    mutate,
+    isFetching,
   };
 }
 

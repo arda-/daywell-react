@@ -49,7 +49,7 @@ export default function Nav() {
     <div className="flex justify-between items-center bg-amber-600 p-2 sticky top-0 z-50">
       <div>Nav bar will eventually go here.</div>
 
-      <AccountCorner />
+      {/* <AccountCorner /> */}
     </div>
   );
 }
