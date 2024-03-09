@@ -2,7 +2,7 @@ import { TrashIcon } from "@heroicons/react/20/solid";
 
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 
-import { useViewSettings, setActiveTask } from "@/lib/dataHelpers";
+import { useViewSettings, setActiveTask, setTaskTag } from "@/lib/dataHelpers";
 
 import { classNames } from "@/lib/helpers";
 

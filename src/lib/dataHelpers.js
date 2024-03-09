@@ -104,3 +104,19 @@ export function useTasks() {
     mutate,
   };
 }
+
+export async function setTaskTag(idTask, idTag) {
+  try {
+    const dbResponse = await databases.updateDocument(
+      DATABASE_ID,
+      COLLECTION_IDS.TODOS,
+      idTask,
+      {
+        idTag,
+      }
+    );
+    console.log("set task tag", JSON.stringify(dbResponse, null, 2));
+  } catch (e) {
+    console.error(e);
+  }
+}
