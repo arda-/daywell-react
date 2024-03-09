@@ -5,12 +5,13 @@ import { Suspense } from "react";
 import BigTask from "@/components/Task";
 import BottomMenu from "@/components/BottomMenu";
 import Button from "@/components/Button";
-import { AgendaViewSettingsProvider } from "@/lib/context/agendaViewSettings";
+
 import {
-  useTasks,
+  fetchTasks,
   useViewSettings,
   setActiveTask,
   createTask,
+  fetchViewSettings,
 } from "@/lib/dataHelpers";
 
 export default function Agenda() {
