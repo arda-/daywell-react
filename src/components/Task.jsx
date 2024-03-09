@@ -1,3 +1,5 @@
+"use client";
+
 import { TrashIcon } from "@heroicons/react/20/solid";
 
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
@@ -236,12 +238,7 @@ export const Task = (props) => {
 const TaskWithData = (props) => {
   const { id } = props;
 
-  const {
-    viewSettings,
-    error: viewSettingsError,
-    isLoading: loadingViewSettings,
-    mutate: mutateViewSettings,
-  } = useViewSettings();
+  let viewSettings = [{ $id: 0 }];
 
   const idActiveTask = () => viewSettings[0].activeTask?.$id;
   const idViewSetting = viewSettings[0]["$id"];

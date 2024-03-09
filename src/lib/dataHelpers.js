@@ -1,5 +1,3 @@
-import useSWR from "swr";
-
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 import { ID } from "appwrite";
 
@@ -20,24 +18,24 @@ export async function fetchViewSettings() {
   }
 }
 
-export function useViewSettings() {
-  const { data, error, isLoading, mutate } = useSWR(
-    `viewSettings`,
-    fetchViewSettings
-  );
+// export function useViewSettings() {
+//   const { data, error, isLoading, mutate } = useSWR(
+//     `viewSettings`,
+//     fetchViewSettings
+//   );
 
-  const middlemanMutate = () => {
-    console.log("mutated view settings");
-    mutate();
-  };
+//   const middlemanMutate = () => {
+//     console.log("mutated view settings");
+//     mutate();
+//   };
 
-  return {
-    viewSettings: data,
-    isLoading,
-    error,
-    mutate: middlemanMutate,
-  };
-}
+//   return {
+//     viewSettings: data,
+//     isLoading,
+//     error,
+//     mutate: middlemanMutate,
+//   };
+// }
 
 export async function setActiveTask(idViewSetting, idActiveTask) {
   console.log("calling setActiveTask", idViewSetting, idActiveTask);
@@ -94,16 +92,16 @@ export async function fetchTasks() {
   }
 }
 
-export function useTasks() {
-  const { data, error, isLoading, mutate } = useSWR(`allTasks`, fetchTasks);
+// export function useTasks() {
+//   const { data, error, isLoading, mutate } = useSWR(`allTasks`, fetchTasks);
 
-  return {
-    tasks: data,
-    isLoading,
-    error,
-    mutate,
-  };
-}
+//   return {
+//     tasks: data,
+//     isLoading,
+//     error,
+//     mutate,
+//   };
+// }
 
 export async function setTaskTag(idTask, idTag) {
   try {
