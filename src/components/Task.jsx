@@ -10,7 +10,12 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 
-import { useViewSettings, setActiveTask, setTaskTag } from "@/lib/dataHelpers";
+import {
+  useViewSettings,
+  setActiveTask,
+  setTaskTag,
+  useMutateDocument,
+} from "@/lib/dataHelpers";
 
 import { classNames } from "@/lib/helpers";
 
@@ -295,57 +300,7 @@ const TaskWithData = (props) => {
     }
   };
 
-  const mutateActiveTask = useMutation({
-    mutationFn: (props) => {
-      console.log(
-        "mutateActiveTask, curried fn props",
-        JSON.stringify(props, null, 2)
-      );
-      return setActiveTask(props);
-    },
-    onMutate: async (props) => {
-      // queryClient.cancelQueries({ queryKey: ["todos", newTodo.id] });
-      const previousViewSettings = queryClient.getQueryData(["viewSettings"]);
-      const newViewSettings = {
-        ...previousViewSettings[0],
-        idActiveTask: props.idActiveTask,
-      };
-      console.log(
-        "onMutate",
-        JSON.stringify({ previousViewSettings, newViewSettings }, null, 2)
-      );
-
-      queryClient.setQueryData(["viewSettings"], [newViewSettings]);
-      return { previousViewSettings, newViewSettings };
-    },
-    onError: (error, newViewSettings, context) => {
-      queryClient.setQueryData(["viewSettings"], context.previousViewSettings);
-    },
-  });
-
-  const mutateViewSettings = useMutation({
-    mutationFn: (props) => {
-      console.log("useMutation curried props", JSON.stringify(props, null, 2));
-      return setFieldOnDocument(props);
-    },
-    onMutate: async (props) => {
-      const { queryKey, document, field, value } = props;
-      const eagerUpdate = {
-        ...document,
-        [field]: value,
-      };
-      console.log(`optimistically setting ${queryKey} to`, [
-        JSON.stringify(eagerUpdate, null, 2),
-      ]);
-
-      queryClient.setQueryData(queryKey, [eagerUpdate]);
-      return { oldVal: document, attemptedVal: eagerUpdate };
-    },
-    onError: (error, variables, context) => {
-      // console.log("onError", { error, variables, context });
-      queryClient.setQueryData(queryKey, context.oldVal);
-    },
-  });
+  const mutateViewSettings = useMutateDocument();
 
   const handleEditAreaClick = async () => {
     console.log("handleEditAreaClick");

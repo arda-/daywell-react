@@ -32,7 +32,7 @@ export async function setFieldOnDocument({ document, field, value }) {
   );
   try {
     const dbResponse = await databases.updateDocument(
-      document.$documentid,
+      document.$databaseId,
       document.$collectionId,
       document.$id,
       {
@@ -56,7 +56,7 @@ export function useMutateDocument() {
   }
 
   return useMutation({
-    mutateFn: (props) => {
+    mutationFn: (props) => {
       console.log("useMutation curried props", JSON.stringify(props, null, 2));
       return setFieldOnDocument(props);
     },
