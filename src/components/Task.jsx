@@ -331,8 +331,13 @@ const TaskWithData = (props) => {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_IDS.TODOS, id);
 
       if (idActiveTask() === id) {
-        await setActiveTask(idViewSetting, null);
-        mutateViewSettings();
+        // todo: verify whether this works
+        mutateViewSettings.mutate({
+          queryKey: ["viewSettings"],
+          document: viewSettings[0],
+          field: "idActiveTask",
+          value: "",
+        });
       }
       props.listMutate();
     } catch (e) {
