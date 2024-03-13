@@ -25,14 +25,22 @@ export async function fetchViewSettings() {
 }
 
 export function useViewSettings() {
+  const placeholderViewSettings = [
+    {
+      $id: undefined,
+      idActiveTask: null,
+    },
+  ];
+
   const {
     status,
     data: viewSettings,
     error,
     isFetching,
   } = useQuery({
-    queryKey: "viewSettings",
+    queryKey: ["viewSettings"],
     queryFn: fetchViewSettings,
+    placeholderData: placeholderViewSettings,
   });
 
   return {
@@ -43,7 +51,10 @@ export function useViewSettings() {
   };
 }
 
-export async function setActiveTask(idViewSetting, idActiveTask) {
+export async function setActiveTask({
+  idViewSetting, // string
+  idActiveTask, // string
+}) {
   console.log("calling setActiveTask", idViewSetting, idActiveTask);
   try {
     const dbResponse = await databases.updateDocument(
@@ -51,13 +62,11 @@ export async function setActiveTask(idViewSetting, idActiveTask) {
       COLLECTION_IDS.VIEW_SETTINGS,
       idViewSetting,
       {
-        activeTask: idActiveTask,
+        idActiveTask,
       }
     );
-    console.log(
-      "set active task",
-      JSON.stringify(dbResponse.document, null, 2)
-    );
+    console.log("latest viewSettings doc", JSON.stringify(dbResponse, null, 2));
+    return dbResponse;
   } catch (e) {
     console.error(e);
   }
@@ -91,7 +100,7 @@ export async function fetchTasks() {
       COLLECTION_IDS.TODOS,
       []
     );
-    console.log("fetched tasks", dbResponse.documents);
+    // console.log("fetched tasks", dbResponse.documents);
     return dbResponse.documents;
   } catch (e) {
     console.error(e);
@@ -105,11 +114,11 @@ export function useTasks() {
     error,
     isFetching,
   } = useQuery({
-    queryKey: "tasks",
+    queryKey: ["tasks"],
     queryFn: fetchTasks,
   });
 
-  console.log(status, tasks, error, isFetching);
+  // console.log("useTasks", status, tasks, error, isFetching);
 
   return {
     status,

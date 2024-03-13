@@ -2,6 +2,14 @@ import { TrashIcon } from "@heroicons/react/20/solid";
 
 import { DATABASE_ID, COLLECTION_IDS, databases } from "@/lib/appwrite";
 
+import {
+  useQuery,
+  useQueryClient,
+  useMutation,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+
 import { useViewSettings, setActiveTask, setTaskTag } from "@/lib/dataHelpers";
 
 import { classNames } from "@/lib/helpers";
@@ -234,12 +242,18 @@ export const Task = (props) => {
 };
 
 const TaskWithData = (props) => {
+  const queryClient = useQueryClient();
+  const {
+    status: viewSettingsStatus,
+    viewSettings,
+    error: viewSettingsError,
+    isFetching: fetchingViewSettings,
+  } = useViewSettings();
+
   const { id } = props;
 
-  let viewSettings = [{ $id: 0 }];
-
-  const idActiveTask = () => viewSettings[0].activeTask?.$id;
-  const idViewSetting = viewSettings[0]["$id"];
+  const idActiveTask = viewSettings[0].idActiveTask;
+  const idViewSetting = viewSettings[0].$id;
 
   // TODO: figure out suspense for loading
 
@@ -281,14 +295,34 @@ const TaskWithData = (props) => {
     }
   };
 
+  const mutateActiveTask = useMutation({
+    mutationFn: (props) => {
+      console.log("mutateActiveTask, curried fn props", props);
+      return setActiveTask(props);
+    },
+    onSuccess: (data, variables) => {
+      console.log("succesfully modifiedActiveTask", {
+        data,
+        variables,
+      });
+      queryClient.setQueryData(["viewSettings"], [data]);
+    },
+  });
+
   const handleEditAreaClick = async () => {
+    console.log("handleEditAreaClick");
     try {
-      if (idActiveTask() === id) {
-        await setActiveTask(idViewSetting, null);
+      if (idActiveTask === id) {
+        mutateActiveTask.mutate({
+          idViewSetting,
+          idActiveTask: "",
+        });
       } else {
-        await setActiveTask(idViewSetting, id);
+        mutateActiveTask.mutate({
+          idViewSetting,
+          idActiveTask: id,
+        });
       }
-      mutateViewSettings();
     } catch (e) {
       console.error(e);
     }

@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const handleClickAddTask = async (event) => {
   console.log("handleClickAddTask");
+  const queryClient = useQueryClient();
 
   try {
     const newDoc = await createTask(); // TODO: this is async and can error.
@@ -25,9 +26,11 @@ const handleClickAddTask = async (event) => {
     if (!newDoc) {
       throw new Error("could not create new task");
     }
-    mutateTasks();
-    setActiveTask(idViewSettings, newDoc.$id);
-    mutateViewSettings();
+
+    queryClient.invalidateQueries("tasks");
+
+    // setActiveTask(idViewSettings, newDoc.$id);
+    // queryClient.invalidateQueries("viewSettings");
   } catch (e) {
     console.error(e);
   }
@@ -44,10 +47,10 @@ export default function Agenda() {
 
   const [test, setTest] = useState(0);
 
-  useEffect(() => {
-    console.log(tasksStatus, tasks, tasksError, fetchingTasks);
-    setTest(test + 1);
-  }, [tasksStatus, tasks, tasksError, fetchingTasks]);
+  // useEffect(() => {
+  //   console.log(tasksStatus, tasks, tasksError, fetchingTasks);
+  //   setTest(test + 1);
+  // }, [tasksStatus, tasks, tasksError, fetchingTasks]);
 
   const {
     status: viewSettingsStatus,
@@ -62,12 +65,28 @@ export default function Agenda() {
   //   return <div>loading AGENDA...</div>;
   // }
 
-  const idActiveTask = viewSettings?.length > 0 ?? viewSettings[0]?.$id;
+  // console.log(
+  //   JSON.stringify(
+  //     {
+  //       viewSettingsStatus,
+  //       viewSettings,
+  //       viewSettingsError,
+  //       fetchingViewSettings,
+  //     },
+  //     null,
+  //     2
+  //   )
+  // );
+
+  const idActiveTask = viewSettings[0].idActiveTask;
 
   // render data
   return (
     <>
       <h1>AGENDA</h1>
+      {/* <div>
+        viewSettings: {JSON.stringify(viewSettings[0].activeTask.$id, null, 2)}
+      </div> */}
       <div>idActiveTask: {idActiveTask}</div>
       {tasksStatus === "pending" && <div>loading tasks...</div>}
       <div>
