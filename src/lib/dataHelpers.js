@@ -5,6 +5,7 @@ import {
   useQueryClient,
   QueryClient,
   QueryClientProvider,
+  useMutation,
 } from "@tanstack/react-query";
 
 export async function fetchViewSettings() {
@@ -19,6 +20,80 @@ export async function fetchViewSettings() {
       JSON.stringify(dbResponse.documents, null, 2)
     );
     return dbResponse.documents;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function setFieldOnDocument({ document, field, value }) {
+  try {
+    const dbResponse = await databases.updateDocument(
+      document.$documentid,
+      document.$collectionId,
+      document.$id,
+      {
+        [field]: value,
+      }
+    );
+    console.log(
+      `udpated ${document.$collectionId} doc`,
+      JSON.stringify(dbResponse, null, 2)
+    );
+    return dbResponse;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function useMutateDocument() {
+  const queryClient = useQueryClient();
+  if (!queryClient) {
+    throw new Error("query client does not exist");
+  }
+
+  return useMutation({
+    mutateFn: (props) => {
+      console.log("useMutation curried props", JSON.stringify(props, null, 2));
+      const { queryKey, document, field, value } = props;
+
+      const eagerUpdate = (document[field] = value);
+
+      console.log(`optimistically setting ${queryKey} to`, [
+        JSON.stringify(eagerUpdate, null, 2),
+      ]);
+
+      queryClient.setQueryData(queryKey, [eagerUpdate]);
+
+      return setFieldOnDocument({ document, field, value });
+    },
+    onSettled: (data, variables, context) => {
+      console.log("round trip from server", {
+        data,
+        variables,
+        context,
+      });
+      const { queryKey, document, field, value } = variables;
+      queryClient.setQueryData(queryKey, [data]);
+    },
+    // todo; figure out what to do if we get an error
+  });
+}
+
+export async function mutateViewSettings({ field, value }) {
+  const queryClient = useQueryClient();
+  const previousViewSettings = queryClient.getQueryData(["viewSettings"]);
+
+  try {
+    const dbResponse = await databases.updateDocument(
+      DATABASE_ID,
+      COLLECTION_IDS.VIEW_SETTINGS,
+      previousViewSettings.$id,
+      {
+        idActiveTask,
+      }
+    );
+    console.log("latest viewSettings doc", JSON.stringify(dbResponse, null, 2));
+    return dbResponse;
   } catch (e) {
     console.error(e);
   }
