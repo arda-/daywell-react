@@ -26,6 +26,10 @@ export async function fetchViewSettings() {
 }
 
 export async function setFieldOnDocument({ document, field, value }) {
+  console.log(
+    "setFieldOnDocument",
+    JSON.stringify({ document, field, value }, null, 2)
+  );
   try {
     const dbResponse = await databases.updateDocument(
       document.$documentid,
@@ -45,7 +49,7 @@ export async function setFieldOnDocument({ document, field, value }) {
   }
 }
 
-export async function useMutateDocument() {
+export function useMutateDocument() {
   const queryClient = useQueryClient();
   if (!queryClient) {
     throw new Error("query client does not exist");
@@ -54,28 +58,25 @@ export async function useMutateDocument() {
   return useMutation({
     mutateFn: (props) => {
       console.log("useMutation curried props", JSON.stringify(props, null, 2));
+      return setFieldOnDocument(props);
+    },
+    onMutate: async (props) => {
       const { queryKey, document, field, value } = props;
-
-      const eagerUpdate = (document[field] = value);
-
+      const eagerUpdate = {
+        ...document,
+        [field]: value,
+      };
       console.log(`optimistically setting ${queryKey} to`, [
         JSON.stringify(eagerUpdate, null, 2),
       ]);
 
       queryClient.setQueryData(queryKey, [eagerUpdate]);
-
-      return setFieldOnDocument({ document, field, value });
+      return { oldVal: document, attemptedVal: eagerUpdate };
     },
-    onSettled: (data, variables, context) => {
-      console.log("round trip from server", {
-        data,
-        variables,
-        context,
-      });
-      const { queryKey, document, field, value } = variables;
-      queryClient.setQueryData(queryKey, [data]);
+    onError: (error, variables, context) => {
+      // console.log("onError", { error, variables, context });
+      queryClient.setQueryData(queryKey, context.oldVal);
     },
-    // todo; figure out what to do if we get an error
   });
 }
 

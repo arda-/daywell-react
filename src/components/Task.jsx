@@ -10,12 +10,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 
-import {
-  useViewSettings,
-  setActiveTask,
-  setTaskTag,
-  useMutateDocument,
-} from "@/lib/dataHelpers";
+import { useViewSettings, setActiveTask, setTaskTag } from "@/lib/dataHelpers";
 
 import { classNames } from "@/lib/helpers";
 
@@ -326,52 +321,48 @@ const TaskWithData = (props) => {
     onError: (error, newViewSettings, context) => {
       queryClient.setQueryData(["viewSettings"], context.previousViewSettings);
     },
-    onSuccess: (data, variables) => {
-      console.log(
-        "succesfully modifiedActiveTask",
-        JSON.stringify(
-          {
-            data,
-            variables,
-          },
-          null,
-          2
-        )
-      );
-      // queryClient.setQueryData(["viewSettings"], [data]);
-    },
   });
 
-  const mutateViewSettings = useMutateDocument({
-    queryClient,
+  const mutateViewSettings = useMutation({
+    mutationFn: (props) => {
+      console.log("useMutation curried props", JSON.stringify(props, null, 2));
+      return setFieldOnDocument(props);
+    },
+    onMutate: async (props) => {
+      const { queryKey, document, field, value } = props;
+      const eagerUpdate = {
+        ...document,
+        [field]: value,
+      };
+      console.log(`optimistically setting ${queryKey} to`, [
+        JSON.stringify(eagerUpdate, null, 2),
+      ]);
+
+      queryClient.setQueryData(queryKey, [eagerUpdate]);
+      return { oldVal: document, attemptedVal: eagerUpdate };
+    },
+    onError: (error, variables, context) => {
+      // console.log("onError", { error, variables, context });
+      queryClient.setQueryData(queryKey, context.oldVal);
+    },
   });
 
   const handleEditAreaClick = async () => {
     console.log("handleEditAreaClick");
     try {
       if (idActiveTask === id) {
-        // mutateViewSettings.mutate({
-        //   queryKey: ["viewSettings"],
-        //   document: viewSettings[0],
-        //   field: "idActiveTask",
-        //   value: "",
-        // });
-
-        mutateActiveTask.mutate({
-          idViewSetting,
-          idActiveTask: "",
+        mutateViewSettings.mutate({
+          queryKey: ["viewSettings"],
+          document: viewSettings[0],
+          field: "idActiveTask",
+          value: "",
         });
       } else {
-        // mutateViewSettings.mutate({
-        //   queryKey: ["viewSettings"],
-        //   document: viewSettings[0],
-        //   field: "idActiveTask",
-        //   value: id,
-        // });
-
-        mutateActiveTask.mutate({
-          idViewSetting,
-          idActiveTask: id,
+        mutateViewSettings.mutate({
+          queryKey: ["viewSettings"],
+          document: viewSettings[0],
+          field: "idActiveTask",
+          value: id,
         });
       }
     } catch (e) {
