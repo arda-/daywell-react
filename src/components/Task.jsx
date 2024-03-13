@@ -325,24 +325,36 @@ const TaskWithData = (props) => {
     }
   };
 
+  const deleteActiveTask = useMutation({
+    mutationFn: () =>
+      databases.deleteDocument(DATABASE_ID, COLLECTION_IDS.TODOS, id),
+    onMutate: async (props) => {
+      const previousTodos = queryClient.getQueryData(["tasks"]);
+      const newTodos = previousTodos.filter((todo) => todo.$id !== id);
+      console.log(JSON.stringify({ previousTodos, newTodos }, null, 2));
+      queryClient.setQueryData(["tasks"], newTodos);
+
+      return { previousTodos, newTodos };
+    },
+    onError: (error, variables, context) => {
+      // console.error("onError", { error, variables, context });
+      queryClient.setQueryData(["tasks"], context.previousTodos);
+    },
+    onSuccess: (data, variables, context) => {
+      // console.log("onSuccess", { data, variables, context });
+      mutateViewSettings.mutate({
+        queryKey: ["viewSettings"],
+        document: viewSettings[0],
+        field: "idActiveTask",
+        value: "",
+      });
+    },
+  });
+
   const handleDelete = async () => {
     console.log("handling delete");
-    try {
-      await databases.deleteDocument(DATABASE_ID, COLLECTION_IDS.TODOS, id);
 
-      if (idActiveTask() === id) {
-        // todo: verify whether this works
-        mutateViewSettings.mutate({
-          queryKey: ["viewSettings"],
-          document: viewSettings[0],
-          field: "idActiveTask",
-          value: "",
-        });
-      }
-      props.listMutate();
-    } catch (e) {
-      console.error(e);
-    }
+    deleteActiveTask.mutate();
   };
 
   return (
