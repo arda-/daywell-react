@@ -15,6 +15,7 @@ import {
   setActiveTask,
   setTaskTag,
   useMutateDocument,
+  setFieldOnDocument,
 } from "@/lib/dataHelpers";
 
 import { classNames } from "@/lib/helpers";
@@ -260,23 +261,36 @@ const TaskWithData = (props) => {
   const idActiveTask = viewSettings[0].idActiveTask;
   const idViewSetting = viewSettings[0].$id;
 
-  // TODO: figure out suspense for loading
+  const taskMutation = useMutation({
+    mutationFn: setFieldOnDocument,
+    onMutate: async (props) => {
+      const { document, field, value } = props;
+      console.log("taskMutation curried props", JSON.stringify(props, null, 2));
+      const previousTodos = queryClient.getQueryData(["tasks"]);
+      const index = previousTodos.findIndex((todo) => todo.$id === id);
+      const newTask = { ...document, [field]: value };
+      const newTodos = previousTodos.toSpliced(index, 1, newTask);
 
-  const updateField = async (field, value) => {
-    try {
-      const newDoc = await databases.updateDocument(
-        DATABASE_ID,
-        COLLECTION_IDS.TODOS,
-        id,
-        {
-          [field]: value,
-        }
-      );
-      props.listMutate();
-    } catch (e) {
-      console.error(e);
-    }
-  };
+      // console.log(
+      //   JSON.stringify(
+      //     {
+      //       oldTask,
+      //       newTask,
+      //     },
+      //     null,
+      //     2
+      //   )
+      // );
+
+      // console.log(JSON.stringify({ previousTodos, newTodos }, null, 2));
+      queryClient.setQueryData(["tasks"], newTodos);
+      return { previousTodos, newTodos };
+    },
+    onError: (error, variables, context) => {
+      // console.log("onError", { error, variables, context });
+      queryClient.setQueryData(queryKey, context.previousTodos);
+    },
+  });
 
   const handleChange = async (field, value) => {
     // TODO: update task
@@ -287,7 +301,10 @@ const TaskWithData = (props) => {
         case "important":
         case "text":
           console.log(`updating ${field} to`, value);
-          await updateField(field, value);
+          // taskMutator.mutate({ document: props.task, field, value });
+          taskMutation.mutate({ document: props.task, field, value });
+          // await setFieldOnDocument({ document: props.task, field, value });
+          // queryClient.invalidateQueries(["tasks"]);
           break;
         case "tagName":
           await setTaskTagName(value);
@@ -352,8 +369,7 @@ const TaskWithData = (props) => {
   });
 
   const handleDelete = async () => {
-    console.log("handling delete");
-
+    // console.log("handling delete");
     deleteActiveTask.mutate();
   };
 

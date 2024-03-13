@@ -15,10 +15,10 @@ export async function fetchViewSettings() {
       COLLECTION_IDS.VIEW_SETTINGS,
       []
     );
-    console.log(
-      "fetched view settings",
-      JSON.stringify(dbResponse.documents, null, 2)
-    );
+    // console.log(
+    //   "fetched view settings",
+    //   JSON.stringify(dbResponse.documents, null, 2)
+    // );
     return dbResponse.documents;
   } catch (e) {
     console.error(e);
@@ -40,7 +40,7 @@ export async function setFieldOnDocument({ document, field, value }) {
       }
     );
     console.log(
-      `udpated ${document.$collectionId} doc`,
+      `updated ${document.$collectionId} doc`,
       JSON.stringify(dbResponse, null, 2)
     );
     return dbResponse;
@@ -93,7 +93,7 @@ export async function mutateViewSettings({ field, value }) {
         idActiveTask,
       }
     );
-    console.log("latest viewSettings doc", JSON.stringify(dbResponse, null, 2));
+    // console.log("latest viewSettings doc", JSON.stringify(dbResponse, null, 2));
     return dbResponse;
   } catch (e) {
     console.error(e);

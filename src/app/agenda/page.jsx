@@ -101,6 +101,7 @@ export default function Agenda() {
             tagName={"stub tag name"}
             editing={idActiveTask === task.$id}
             showTag={false}
+            task={task}
           />
         ))}
       </div>
