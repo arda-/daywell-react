@@ -9,32 +9,11 @@ import Button from "@/components/Button";
 import {
   useTasks,
   useViewSettings,
-  setActiveTask,
   createTask,
-  fetchViewSettings,
+  useMutateDocument,
 } from "@/lib/dataHelpers";
 
 import { useQueryClient } from "@tanstack/react-query";
-
-const handleClickAddTask = async (event) => {
-  console.log("handleClickAddTask");
-  const queryClient = useQueryClient();
-
-  try {
-    const newDoc = await createTask(); // TODO: this is async and can error.
-
-    if (!newDoc) {
-      throw new Error("could not create new task");
-    }
-
-    queryClient.invalidateQueries("tasks");
-
-    // setActiveTask(idViewSettings, newDoc.$id);
-    // queryClient.invalidateQueries("viewSettings");
-  } catch (e) {
-    console.error(e);
-  }
-};
 
 export default function Agenda() {
   const queryClient = useQueryClient();
@@ -44,8 +23,7 @@ export default function Agenda() {
     error: tasksError,
     isFetching: fetchingTasks,
   } = useTasks();
-
-  const [test, setTest] = useState(0);
+  const mutateViewSettings = useMutateDocument();
 
   // useEffect(() => {
   //   console.log(tasksStatus, tasks, tasksError, fetchingTasks);
@@ -61,26 +39,31 @@ export default function Agenda() {
 
   if (tasksError) return <div>failed to load tasks</div>;
   if (viewSettingsError) return <div>failed to load viewSettings</div>;
-  // if (fetchingTasks || fetchingViewSettings) {
-  //   return <div>loading AGENDA...</div>;
-  // }
-
-  // console.log(
-  //   JSON.stringify(
-  //     {
-  //       viewSettingsStatus,
-  //       viewSettings,
-  //       viewSettingsError,
-  //       fetchingViewSettings,
-  //     },
-  //     null,
-  //     2
-  //   )
-  // );
 
   const idActiveTask = viewSettings[0].idActiveTask;
 
-  // render data
+  const handleClickAddTask = async (event) => {
+    console.log("handleClickAddTask");
+
+    try {
+      const newDoc = await createTask(); // TODO: this is async and can error.
+
+      if (!newDoc) {
+        throw new Error("could not create new task");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      mutateViewSettings.mutate({
+        queryKey: ["viewSettings"],
+        document: viewSettings[0],
+        field: "idActiveTask",
+        value: newDoc.$id,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <>
       <h1>AGENDA</h1>
