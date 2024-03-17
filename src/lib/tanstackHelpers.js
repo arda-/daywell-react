@@ -65,7 +65,7 @@ export async function mutateViewSettings({ field, value }) {
   }
 }
 
-export function useViewSettings() {
+export function useViewSettings(initialData) {
   const placeholderViewSettings = [
     {
       $id: undefined,
@@ -81,6 +81,7 @@ export function useViewSettings() {
   } = useQuery({
     queryKey: ["viewSettings"],
     queryFn: fetchViewSettings,
+    initialData,
     placeholderData: placeholderViewSettings,
   });
 
@@ -92,7 +93,8 @@ export function useViewSettings() {
   };
 }
 
-export function useTasks() {
+// NB initialData can be undefined
+export function useTasks(initialData) {
   const {
     status,
     data: tasks,
@@ -101,6 +103,7 @@ export function useTasks() {
   } = useQuery({
     queryKey: ["tasks"],
     queryFn: fetchTasks,
+    initialData,
   });
 
   // console.log("useTasks", status, tasks, error, isFetching);
