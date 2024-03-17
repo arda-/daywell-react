@@ -6,14 +6,15 @@ import BigTask from "@/components/Task";
 import BottomMenu from "@/components/BottomMenu";
 import Button from "@/components/Button";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import {
   useTasks,
   useViewSettings,
-  createTask,
   useMutateDocument,
-} from "@/lib/dataHelpers";
+} from "@/lib/tanstackHelpers";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { createTask } from "@/lib/dataHelpers";
 
 export default function Agenda() {
   const queryClient = useQueryClient();

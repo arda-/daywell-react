@@ -16,7 +16,7 @@ import {
   setTaskTag,
   useMutateDocument,
   setFieldOnDocument,
-} from "@/lib/dataHelpers";
+} from "@/lib/tanstackHelpers";
 
 import { classNames } from "@/lib/helpers";
 
